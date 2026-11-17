@@ -43,7 +43,7 @@ jobs:
         with:
           tagName: v__VERSION__
           releaseName: "twnty v__VERSION__"
-          releaseBody: "macOS Universal (.dmg) and Windows (.msi / .exe) builds for twnty."
-          releaseDraft: true
+          releaseBody: "Download the macOS Universal installer (`.dmg`) or Windows installer (`.exe` / `.msi`) below."
+          releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}

@@ -6,6 +6,15 @@ A pair of friendly eyes lives in your menu bar (macOS) or system tray (Windows) 
 
 ---
 
+## Download
+
+Grab the latest prebuilt installers from [**GitHub Releases**](https://github.com/Abhsin/twnty/releases/latest):
+
+- **macOS (Apple Silicon & Intel Universal)**: `twnty_0.1.0_universal.dmg`
+- **Windows**: `twnty_0.1.0_x64-setup.exe` or `twnty_0.1.0_x64_en-US.msi`
+
+---
+
 ## Features
 
 - **5 Selectable Eye Styles**: Choose between **Classic**, **Googly** (with spring-physics pupils), **Cat** (with dilating vertical slits), **Sparkle** (anime style), and **Dot** (minimalist ink dots with blushing cheeks).
