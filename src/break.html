@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Break</title>
+    <link rel="stylesheet" href="./base.css" />
+    <link rel="stylesheet" href="./break.css" />
+  </head>
+  <body>
+    <main id="root" class="break mode-card">
+      <div class="sheet" data-tauri-drag-region>
+        <div id="eyes" class="eyes" data-tauri-drag-region></div>
+
+        <h1 id="title" data-tauri-drag-region>Look at something far away</h1>
+        <p id="hint" class="hint" data-tauri-drag-region>About 20 feet. Let your eyes go soft.</p>
+
+        <div id="secs" class="count" data-tauri-drag-region>20</div>
+        <div class="bar"><div id="bar-fill" class="bar-fill"></div></div>
+
+        <div class="actions">
+          <button id="plus" type="button">+10 s</button>
+          <span id="sep" class="sep">·</span>
+          <button id="skip" type="button">Skip</button>
+        </div>
+      </div>
+    </main>
+    <script type="module" src="./break.ts"></script>
+  </body>
+</html>

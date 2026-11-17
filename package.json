@@ -1,0 +1,24 @@
+{
+  "name": "twnty",
+  "private": true,
+  "version": "0.1.0",
+  "description": "A tiny, open-source desktop companion for the 20-20-20 rule",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "build:exe": "npm run build && cargo build --release --manifest-path src-tauri/Cargo.toml --features tauri/custom-protocol",
+    "start": "src-tauri\\target\\release\\twnty.exe",
+    "preview": "vite preview",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.2.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.2.0",
+    "typescript": "~5.6.2",
+    "vite": "^6.0.0"
+  }
+}
+

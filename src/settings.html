@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>twnty</title>
+    <link rel="stylesheet" href="./base.css" />
+    <link rel="stylesheet" href="./settings.css" />
+  </head>
+  <body>
+    <main class="page">
+      <header class="hero">
+        <button id="eyes" class="eyes" type="button" title="Hi"></button>
+        <div id="time" class="time">20:00</div>
+        <div id="caption" class="caption">until your next break</div>
+
+        <div class="controls">
+          <button id="break-now" class="btn btn-primary" type="button">Take a break</button>
+          <button id="pause" class="btn" type="button">Pause</button>
+          <button id="reset" class="btn" type="button">Reset</button>
+        </div>
+
+        <p id="today" class="today">No breaks yet today.</p>
+      </header>
+
+      <section>
+        <h2>Eyes</h2>
+        <div id="styles" class="styles"></div>
+      </section>
+
+      <section>
+        <h2>Rhythm</h2>
+        <div class="list">
+          <div class="row">
+            <span class="label">Break every</span>
+            <div class="seg" data-key="work_duration_secs">
+              <button type="button" data-value="900">15</button>
+              <button type="button" data-value="1200">20</button>
+              <button type="button" data-value="1500">25</button>
+              <button type="button" data-value="1800">30 min</button>
+            </div>
+          </div>
+          <div class="row">
+            <span class="label">Rest for</span>
+            <div class="seg" data-key="break_duration_secs">
+              <button type="button" data-value="10">10</button>
+              <button type="button" data-value="20">20</button>
+              <button type="button" data-value="30">30</button>
+              <button type="button" data-value="60">60 s</button>
+            </div>
+          </div>
+          <div class="row">
+            <span class="label">Reminder</span>
+            <div class="seg" data-key="break_style">
+              <button type="button" data-value="card">Card</button>
+              <button type="button" data-value="overlay">Full screen</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Behavior</h2>
+        <div class="list">
+          <label class="row">
+            <span class="text">
+              <span class="label">Floating eyes</span>
+              <span class="sub">Keep a pair on your desktop</span>
+            </span>
+            <input id="sw-widget" type="checkbox" class="switch" />
+          </label>
+          <label class="row">
+            <span class="text">
+              <span class="label">Menu bar countdown</span>
+              <span class="sub">Show time remaining next to the eyes in the macOS status bar</span>
+            </span>
+            <input id="sw-tray-timer" type="checkbox" class="switch" />
+          </label>
+          <label class="row">
+            <span class="text">
+              <span class="label">Sound</span>
+              <span class="sub">A soft chime when a break starts and ends</span>
+            </span>
+            <input id="sw-sound" type="checkbox" class="switch" />
+          </label>
+          <label class="row">
+            <span class="text">
+              <span class="label">Strict mode</span>
+              <span class="sub">No skipping</span>
+            </span>
+            <input id="sw-strict" type="checkbox" class="switch" />
+          </label>
+          <label class="row">
+            <span class="text">
+              <span class="label">Pause when away</span>
+              <span class="sub">After 5 minutes without input</span>
+            </span>
+            <input id="sw-idle" type="checkbox" class="switch" />
+          </label>
+          <label class="row">
+            <span class="text">
+              <span class="label">Respect full screen</span>
+              <span class="sub">Notify quietly during games and presentations</span>
+            </span>
+            <input id="sw-fullscreen" type="checkbox" class="switch" />
+          </label>
+          <label class="row">
+            <span class="text">
+              <span class="label">Open at login</span>
+            </span>
+            <input id="sw-login" type="checkbox" class="switch" />
+          </label>
+        </div>
+      </section>
+
+      <footer>
+        <button id="demo" class="link" type="button">Try a 20-second demo</button>
+        <span class="dot">·</span>
+        <span>v0.1</span>
+      </footer>
+    </main>
+    <script type="module" src="./settings.ts"></script>
+  </body>
+</html>

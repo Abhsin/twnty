@@ -1,0 +1,24 @@
+[package]
+name = "twnty"
+version = "0.1.0"
+description = "A tiny, open-source desktop companion for the 20-20-20 rule"
+authors = ["twnty contributors"]
+edition = "2021"
+rust-version = "1.89"
+
+[lib]
+name = "twnty_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "=2.5.6", features = [] }
+
+[dependencies]
+tauri = { version = "=2.10.3", features = ["tray-icon", "macos-private-api"] }
+serde = { version = "=1.0.228", features = ["derive"] }
+serde_json = "=1.0.149"
+chrono = { version = "=0.4.44", features = ["clock"] }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+tauri-winrt-notification = "=0.8.1"
+winreg = "=0.55.0"

@@ -1,0 +1,144 @@
+html,
+body {
+  background: transparent;
+  overflow: hidden;
+}
+
+.break {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.sheet {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: var(--surface);
+  border-radius: 24px;
+  box-shadow:
+    0 0 0 1px var(--line),
+    0 24px 48px -24px rgba(0, 0, 0, 0.35);
+  animation: rise 0.45s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+/* Full-screen overlay: no card, just a calm field of color */
+.mode-overlay {
+  padding: 0;
+  background: color-mix(in srgb, var(--bg) 94%, transparent);
+}
+
+.mode-overlay .sheet {
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.mode-overlay .eyes {
+  width: 220px;
+  height: 124px;
+  margin-bottom: 36px;
+}
+
+.mode-overlay h1 {
+  font-size: 28px;
+}
+
+.mode-overlay .count {
+  font-size: 96px;
+}
+
+.eyes {
+  width: 132px;
+  height: 74px;
+  margin-bottom: 22px;
+}
+
+h1 {
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.hint {
+  margin-top: 6px;
+  min-height: 20px;
+  font-size: 14px;
+  color: var(--ink-2);
+  transition: opacity 0.3s ease;
+}
+
+.hint.fade {
+  opacity: 0;
+}
+
+.count {
+  margin-top: 22px;
+  font-size: 56px;
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.bar {
+  margin-top: 16px;
+  width: 140px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.bar-fill {
+  width: 100%;
+  height: 100%;
+  background: var(--ink);
+  transform-origin: left;
+  transition: transform 1s linear;
+}
+
+.actions {
+  margin-top: 26px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.actions button {
+  padding: 6px 10px;
+  border-radius: 8px;
+  color: var(--ink-2);
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.actions button:hover {
+  background: var(--hover);
+  color: var(--ink);
+}
+
+/* Completed */
+.is-done .count,
+.is-done .bar,
+.is-done .actions {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}

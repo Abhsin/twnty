@@ -1,0 +1,76 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "twnty",
+  "version": "0.1.0",
+  "identifier": "com.twnty.app",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "macOSPrivateApi": true,
+    "windows": [
+      {
+        "label": "break",
+        "title": "20-20-20 Break",
+        "url": "break.html",
+        "width": 440,
+        "height": 420,
+        "resizable": false,
+        "decorations": false,
+        "transparent": true,
+        "shadow": false,
+        "alwaysOnTop": true,
+        "visible": false,
+        "skipTaskbar": true,
+        "center": true
+      },
+      {
+        "label": "widget",
+        "title": "twnty Eyes",
+        "url": "widget.html",
+        "width": 196,
+        "height": 136,
+        "resizable": false,
+        "decorations": false,
+        "transparent": true,
+        "shadow": false,
+        "alwaysOnTop": true,
+        "visible": false,
+        "skipTaskbar": true
+      },
+      {
+        "label": "settings",
+        "title": "twnty",
+        "url": "settings.html",
+        "width": 480,
+        "height": 800,
+        "minWidth": 420,
+        "minHeight": 560,
+        "resizable": true,
+        "decorations": true,
+        "transparent": false,
+        "visible": false,
+        "center": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico",
+      "icons/icon.png"
+    ]
+  }
+}
+
