@@ -1,7 +1,8 @@
+import { getVersion } from "@tauri-apps/api/app";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { EyesComponent, EYE_STYLES } from "./eyes/eyes";
-import type { AppSettings, TimerSnapshot } from "./types";
+import type { AppSettings, SettingsPatch, TimerSnapshot } from "./types";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -12,11 +13,12 @@ const pauseBtn = $<HTMLButtonElement>("pause");
 const todayEl = $("today");
 const demoBtn = $<HTMLButtonElement>("demo");
 const stylesEl = $("styles");
+const rowTrayTimer = $("row-tray-timer");
+const versionEl = $("version");
 
 const eyes = new EyesComponent(eyesBtn, { autoBlink: true, trackCursor: true });
 eyesBtn.addEventListener("click", () => eyes.blink());
 
-// Live previews for each eye style
 const tiles = EYE_STYLES.map(({ id, name }) => {
   const tile = document.createElement("button");
   tile.type = "button";
@@ -35,17 +37,13 @@ const tiles = EYE_STYLES.map(({ id, name }) => {
   const previewEyes = new EyesComponent(preview, { style: id, trackCursor: true });
   tile.addEventListener("mouseenter", () => previewEyes.blink());
   tile.addEventListener("click", () => {
-    if (!settings || settings.eye_style === id) return;
-    settings.eye_style = id;
-    save();
+    if (!currentSettings || currentSettings.eye_style === id) return;
+    void applyPatch({ eye_style: id });
   });
   return tile;
 });
 
-const DEMO_SECS = 20;
-const DEFAULT_WORK = 1200;
-
-const SWITCHES: Record<string, keyof AppSettings> = {
+const SWITCHES: Record<string, keyof SettingsPatch> = {
   "sw-widget": "show_floating_widget",
   "sw-tray-timer": "show_tray_timer",
   "sw-sound": "sound_enabled",
@@ -55,17 +53,17 @@ const SWITCHES: Record<string, keyof AppSettings> = {
   "sw-login": "launch_at_login",
 };
 
-let settings: AppSettings | null = null;
+let currentSettings: AppSettings | null = null;
+let lastAppliedVersion = -1;
+let lastRenderedVersion = -1;
+let lastRenderedDemo: boolean | null = null;
 
 const mmss = (t: number) => {
   const s = Math.max(0, Math.floor(t));
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 };
 
-function renderControls(): void {
-  if (!settings) return;
-  const s = settings;
-
+function renderControls(s: AppSettings, isDemo: boolean): void {
   document.querySelectorAll<HTMLDivElement>(".seg").forEach((seg) => {
     const key = seg.dataset.key as keyof AppSettings;
     const current = String(s[key]);
@@ -78,18 +76,27 @@ function renderControls(): void {
     $<HTMLInputElement>(id).checked = Boolean(s[key]);
   }
 
-  demoBtn.textContent =
-    s.work_duration_secs === DEMO_SECS ? "Exit demo" : "Try a 20-second demo";
+  demoBtn.textContent = isDemo ? "Exit demo" : "Try a 20-second demo";
 
   for (const t of tiles) t.classList.toggle("is-active", t.dataset.value === s.eye_style);
   eyes.setStyle(s.eye_style);
 }
 
 function render(snap: TimerSnapshot): void {
-  settings = { ...snap.settings };
-  renderControls();
+  if (snap.settings_version < lastAppliedVersion) return;
+  lastAppliedVersion = snap.settings_version;
+  currentSettings = snap.settings;
 
-  const demo = snap.settings.work_duration_secs === DEMO_SECS;
+  rowTrayTimer.classList.toggle("hidden", snap.platform !== "macos");
+
+  if (
+    snap.settings_version !== lastRenderedVersion ||
+    snap.is_demo !== lastRenderedDemo
+  ) {
+    lastRenderedVersion = snap.settings_version;
+    lastRenderedDemo = snap.is_demo;
+    renderControls(snap.settings, snap.is_demo);
+  }
 
   if (snap.phase === "Break") {
     timeEl.textContent = mmss(snap.remaining_secs);
@@ -102,7 +109,9 @@ function render(snap: TimerSnapshot): void {
     eyes.setMood("paused");
   } else {
     timeEl.textContent = mmss(snap.remaining_secs);
-    captionEl.textContent = demo ? "until your next break · demo" : "until your next break";
+    captionEl.textContent = snap.is_demo
+      ? "until your next break · demo"
+      : "until your next break";
     eyes.setProgress(snap.progress);
     eyes.setMood("working");
   }
@@ -117,29 +126,31 @@ function render(snap: TimerSnapshot): void {
         (skipped ? ` · ${skipped} skipped` : "");
 }
 
-async function save(): Promise<void> {
-  if (!settings) return;
-  renderControls();
-  await invoke("update_settings", { newSettings: settings });
+async function applyPatch(patch: SettingsPatch): Promise<void> {
+  if (currentSettings) {
+    currentSettings = { ...currentSettings, ...patch };
+    renderControls(currentSettings, lastRenderedDemo ?? false);
+  }
+  const snap = await invoke<TimerSnapshot>("patch_settings", { patch });
+  render(snap);
 }
 
 document.querySelectorAll<HTMLDivElement>(".seg").forEach((seg) => {
-  const key = seg.dataset.key as keyof AppSettings;
+  const key = seg.dataset.key as keyof SettingsPatch;
   seg.addEventListener("click", (e) => {
     const btn = (e.target as HTMLElement).closest("button");
-    if (!btn || !settings) return;
+    if (!btn || !currentSettings) return;
     const raw = btn.dataset.value!;
-    (settings as unknown as Record<string, unknown>)[key] =
-      key === "break_style" ? raw : Number(raw);
-    save();
+    const val = key === "break_style" ? raw : Number(raw);
+    void applyPatch({ [key]: val } as SettingsPatch);
   });
 });
 
 for (const [id, key] of Object.entries(SWITCHES)) {
   $<HTMLInputElement>(id).addEventListener("change", (e) => {
-    if (!settings) return;
-    (settings as unknown as Record<string, unknown>)[key] = (e.target as HTMLInputElement).checked;
-    save();
+    if (!currentSettings) return;
+    const checked = (e.target as HTMLInputElement).checked;
+    void applyPatch({ [key]: checked } as SettingsPatch);
   });
 }
 
@@ -148,21 +159,25 @@ pauseBtn.addEventListener("click", () => invoke("toggle_pause"));
 $("reset").addEventListener("click", () => invoke("reset_timer"));
 
 demoBtn.addEventListener("click", async () => {
-  if (!settings) return;
-  settings.work_duration_secs =
-    settings.work_duration_secs === DEMO_SECS ? DEFAULT_WORK : DEMO_SECS;
-  await save();
-  await invoke("reset_timer");
+  const snap = await invoke<TimerSnapshot>("toggle_demo_mode");
+  render(snap);
 });
 
 async function init(): Promise<void> {
+  void getVersion()
+    .then((v) => {
+      versionEl.textContent = `v${v}`;
+    })
+    .catch(() => {});
+
+  await listen<TimerSnapshot>("timer-tick", (e) => render(e.payload));
+  await listen<TimerSnapshot>("break-completed", () => eyes.celebrate());
+
   try {
     render(await invoke<TimerSnapshot>("get_timer_snapshot"));
   } catch {
     /* backend not ready */
   }
-  await listen<TimerSnapshot>("timer-tick", (e) => render(e.payload));
-  await listen<TimerSnapshot>("break-completed", () => eyes.celebrate());
 }
 
 init();

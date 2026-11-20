@@ -7,6 +7,8 @@ import type { TimerSnapshot } from "./types";
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
 const root = $("root");
+const sheet = document.querySelector(".sheet") as HTMLElement;
+const eyesEl = $("eyes");
 const title = $("title");
 const hint = $("hint");
 const secs = $("secs");
@@ -15,7 +17,9 @@ const skip = $<HTMLButtonElement>("skip");
 const plus = $<HTMLButtonElement>("plus");
 const sep = $("sep");
 
-const eyes = new EyesComponent($("eyes"), {
+const dragEls = [sheet, eyesEl, title, hint, secs];
+
+const eyes = new EyesComponent(eyesEl, {
   mood: "relaxing",
   autoBlink: false,
   breathing: true,
@@ -23,10 +27,16 @@ const eyes = new EyesComponent($("eyes"), {
 
 const HINTS = ["About 20 feet. Let your eyes go soft.", "Breathe in…", "…and out."];
 let hintTimer: number | null = null;
+let hintFadeTimer: number | null = null;
 
 function setHint(text: string): void {
+  if (hintFadeTimer !== null) {
+    window.clearTimeout(hintFadeTimer);
+    hintFadeTimer = null;
+  }
   hint.classList.add("fade");
-  window.setTimeout(() => {
+  hintFadeTimer = window.setTimeout(() => {
+    hintFadeTimer = null;
     hint.textContent = text;
     hint.classList.remove("fade");
   }, 300);
@@ -43,8 +53,25 @@ function startHints(): void {
 }
 
 function stopHints(): void {
-  if (hintTimer !== null) window.clearInterval(hintTimer);
-  hintTimer = null;
+  if (hintTimer !== null) {
+    window.clearInterval(hintTimer);
+    hintTimer = null;
+  }
+  if (hintFadeTimer !== null) {
+    window.clearTimeout(hintFadeTimer);
+    hintFadeTimer = null;
+  }
+  hint.classList.remove("fade");
+}
+
+function setDragEnabled(enabled: boolean): void {
+  for (const el of dragEls) {
+    if (enabled) {
+      el.setAttribute("data-tauri-drag-region", "");
+    } else {
+      el.removeAttribute("data-tauri-drag-region");
+    }
+  }
 }
 
 let lastPhase = "";
@@ -55,6 +82,8 @@ function render(s: TimerSnapshot): void {
   const overlay = s.settings.break_style === "overlay";
   root.classList.toggle("mode-overlay", overlay);
   root.classList.toggle("mode-card", !overlay);
+  setDragEnabled(!overlay);
+
   skip.classList.toggle("hidden", s.settings.strict_mode);
   sep.classList.toggle("hidden", s.settings.strict_mode);
 
@@ -66,7 +95,6 @@ function render(s: TimerSnapshot): void {
       eyes.setProgress(0);
       eyes.setMood("relaxing");
       startHints();
-      // Reset bar without animating backwards
       fill.style.transition = "none";
       fill.style.transform = "scaleX(1)";
       void fill.offsetWidth;
@@ -79,6 +107,8 @@ function render(s: TimerSnapshot): void {
       const frac = s.total_secs > 0 ? s.remaining_secs / s.total_secs : 0;
       fill.style.transform = `scaleX(${Math.max(0, Math.min(1, frac))})`;
     }
+  } else if (!done) {
+    stopHints();
   }
 
   lastPhase = s.phase;
@@ -92,12 +122,6 @@ window.addEventListener("keydown", (e) => {
 });
 
 async function init(): Promise<void> {
-  try {
-    render(await invoke<TimerSnapshot>("get_timer_snapshot"));
-  } catch {
-    /* backend not ready */
-  }
-
   await listen<TimerSnapshot>("timer-tick", (e) => render(e.payload));
 
   await listen<TimerSnapshot>("break-completed", (e) => {
@@ -109,6 +133,12 @@ async function init(): Promise<void> {
     eyes.setMood("happy");
     if (e.payload.settings.sound_enabled) playGentleChime("complete");
   });
+
+  try {
+    render(await invoke<TimerSnapshot>("get_timer_snapshot"));
+  } catch {
+    /* backend not ready */
+  }
 }
 
 init();

@@ -36,7 +36,6 @@ const CY = 56;
 type Side = -1 | 1;
 
 interface StyleDef {
-  /** Outline path of one eye. side = -1 for the left eye, 1 for the right. */
   shape(cx: number, side: Side): string;
   rx: number;
   ry: number;
@@ -45,13 +44,9 @@ interface StyleDef {
   pupil(cx: number): string;
   range: [number, number];
   closedW: number;
-  /** Blink/droop by squashing the whole eye instead of using a lid. */
   squash?: boolean;
-  /** Spring physics on the pupils. */
   googly?: boolean;
-  /** Extra markup drawn above the outline while the eye is open. */
   overlay?(cx: number): string;
-  /** Extra markup that stays visible even when the eyes are closed. */
   under?(cx: number): string;
 }
 
@@ -208,8 +203,14 @@ export class EyesComponent {
   private def: StyleDef;
   private progress: number;
   private mood: EyeMood;
+  private autoBlink: boolean;
+  private trackCursor: boolean;
+  private celebrating = false;
   private blinking = false;
   private blinkTimer: number | null = null;
+  private blinkEndTimer: number | null = null;
+  private doubleBlinkTimer: number | null = null;
+  private celebrateTimer: number | null = null;
   private target = { x: 0, y: 0 };
   private centers = [55, 145];
 
@@ -228,11 +229,23 @@ export class EyesComponent {
   private blush: SVGElement[] = [];
   private closedPaths: SVGPathElement[] = [];
 
+  // Cache last applied attribute/style values to skip redundant DOM writes
+  private lastFill = "";
+  private lastVein = "";
+  private lastBlush = "";
+  private lastSlit = "";
+  private lastLid = "";
+  private lastSquash = "";
+  private lastPupilTf = "";
+  private lastClosedKey = "";
+
   constructor(container: HTMLElement, opts: EyesOptions = {}) {
     this.style = opts.style ?? "classic";
     this.def = STYLES[this.style];
     this.progress = opts.progress ?? 0;
     this.mood = opts.mood ?? "working";
+    this.autoBlink = opts.autoBlink !== false;
+    this.trackCursor = Boolean(opts.trackCursor);
 
     this.stage = document.createElement("div");
     this.stage.className = "eyes-stage";
@@ -241,8 +254,9 @@ export class EyesComponent {
 
     this.build();
 
-    if (opts.autoBlink !== false) this.scheduleBlink();
-    if (opts.trackCursor) window.addEventListener("mousemove", this.onMouseMove);
+    if (this.autoBlink && !document.hidden) this.scheduleBlink();
+    if (this.trackCursor) window.addEventListener("mousemove", this.onMouseMove);
+    document.addEventListener("visibilitychange", this.onVisibilityChange);
   }
 
   setStyle(style: EyeStyle | string): void {
@@ -259,6 +273,14 @@ export class EyesComponent {
   }
 
   setMood(mood: EyeMood): void {
+    if (this.celebrating && mood === "working") return;
+    if (mood !== "happy" && this.celebrating) {
+      this.celebrating = false;
+      if (this.celebrateTimer !== null) {
+        window.clearTimeout(this.celebrateTimer);
+        this.celebrateTimer = null;
+      }
+    }
     if (mood === this.mood) return;
     this.mood = mood;
     this.kick();
@@ -267,10 +289,21 @@ export class EyesComponent {
 
   /** Smile for a moment, then open fresh and clear. */
   celebrate(ms = 1600): void {
+    if (this.celebrateTimer !== null) {
+      window.clearTimeout(this.celebrateTimer);
+    }
+    this.celebrating = true;
     this.progress = 0;
-    this.setMood("happy");
-    window.setTimeout(() => {
-      if (this.mood === "happy") this.setMood("working");
+    this.mood = "happy";
+    this.render();
+    this.celebrateTimer = window.setTimeout(() => {
+      this.celebrateTimer = null;
+      this.celebrating = false;
+      if (this.mood === "happy") {
+        this.mood = "working";
+        this.kick();
+        this.render();
+      }
     }, ms);
   }
 
@@ -278,14 +311,22 @@ export class EyesComponent {
   look(nx: number, ny: number): void {
     this.target.x = Math.max(-1, Math.min(1, nx));
     this.target.y = Math.max(-1, Math.min(1, ny));
-    if (!this.def.googly) this.renderPupils();
+    if (this.def.googly) {
+      this.wakeSprings();
+    } else {
+      this.renderPupils();
+    }
   }
 
   blink(): void {
-    if (this.blinking || this.mood === "relaxing" || this.mood === "happy") return;
+    if (this.blinking || this.mood === "relaxing" || this.mood === "happy" || document.hidden) {
+      return;
+    }
     this.blinking = true;
     this.render();
-    window.setTimeout(() => {
+    if (this.blinkEndTimer !== null) window.clearTimeout(this.blinkEndTimer);
+    this.blinkEndTimer = window.setTimeout(() => {
+      this.blinkEndTimer = null;
       this.blinking = false;
       this.kick();
       this.render();
@@ -293,12 +334,51 @@ export class EyesComponent {
   }
 
   destroy(): void {
-    if (this.blinkTimer !== null) window.clearTimeout(this.blinkTimer);
+    this.clearTimers();
     cancelAnimationFrame(this.raf);
-    window.removeEventListener("mousemove", this.onMouseMove);
+    this.raf = 0;
+    if (this.trackCursor) window.removeEventListener("mousemove", this.onMouseMove);
+    document.removeEventListener("visibilitychange", this.onVisibilityChange);
   }
 
   // ---------------------------------------------------------------------------
+
+  private clearTimers(): void {
+    if (this.blinkTimer !== null) {
+      window.clearTimeout(this.blinkTimer);
+      this.blinkTimer = null;
+    }
+    if (this.blinkEndTimer !== null) {
+      window.clearTimeout(this.blinkEndTimer);
+      this.blinkEndTimer = null;
+    }
+    if (this.doubleBlinkTimer !== null) {
+      window.clearTimeout(this.doubleBlinkTimer);
+      this.doubleBlinkTimer = null;
+    }
+    if (this.celebrateTimer !== null) {
+      window.clearTimeout(this.celebrateTimer);
+      this.celebrateTimer = null;
+    }
+  }
+
+  private onVisibilityChange = (): void => {
+    if (document.hidden) {
+      if (this.blinkTimer !== null) {
+        window.clearTimeout(this.blinkTimer);
+        this.blinkTimer = null;
+      }
+      if (this.doubleBlinkTimer !== null) {
+        window.clearTimeout(this.doubleBlinkTimer);
+        this.doubleBlinkTimer = null;
+      }
+      cancelAnimationFrame(this.raf);
+      this.raf = 0;
+    } else {
+      if (this.autoBlink && this.blinkTimer === null) this.scheduleBlink();
+      if (this.def.googly) this.wakeSprings();
+    }
+  };
 
   private build(): void {
     const uid = `e${instanceCounter++}`;
@@ -320,23 +400,40 @@ export class EyesComponent {
     this.blush = q(".eye-blush");
     this.closedPaths = q(".closed-path");
 
+    this.lastFill = "";
+    this.lastVein = "";
+    this.lastBlush = "";
+    this.lastSlit = "";
+    this.lastLid = "";
+    this.lastSquash = "";
+    this.lastPupilTf = "";
+    this.lastClosedKey = "";
+
     cancelAnimationFrame(this.raf);
+    this.raf = 0;
     if (d.googly) {
       this.springs.forEach((s) => Object.assign(s, { x: 0, y: 0, vx: 0, vy: 0 }));
-      this.raf = requestAnimationFrame(this.tick);
+      this.wakeSprings();
     }
 
     this.render();
   }
 
   private onMouseMove = (e: MouseEvent): void => {
+    if (document.hidden) return;
     const r = this.stage.getBoundingClientRect();
+    if (r.width === 0 || r.height === 0) return;
     const dx = (e.clientX - (r.left + r.width / 2)) / 260;
     const dy = (e.clientY - (r.top + r.height / 2)) / 200;
     const d = Math.hypot(dx, dy);
     const s = d > 1 ? 1 / d : 1;
     this.look(dx * s, dy * s);
   };
+
+  private wakeSprings(): void {
+    if (!this.def.googly || this.raf !== 0 || document.hidden) return;
+    this.raf = requestAnimationFrame(this.tick);
+  }
 
   /** Give googly pupils a little jolt. */
   private kick(): void {
@@ -345,14 +442,21 @@ export class EyesComponent {
       s.vy -= 3 + i;
       s.vx += (Math.random() - 0.5) * 4;
     });
+    this.wakeSprings();
   }
 
   private tick = (): void => {
+    if (document.hidden) {
+      this.raf = 0;
+      return;
+    }
+
     const [rx, ry] = this.def.range;
     const tx = this.target.x * rx;
     const ty = this.target.y * ry + 7; // gravity: pupils settle low
     const max = 19;
 
+    let allSettled = true;
     this.springs.forEach((s, i) => {
       const k = i ? 0.085 : 0.12;
       const damp = i ? 0.84 : 0.8;
@@ -367,21 +471,53 @@ export class EyesComponent {
         s.vx *= -0.4;
         s.vy *= -0.4;
       }
+
+      const settled =
+        Math.abs(s.vx) < 0.05 &&
+        Math.abs(s.vy) < 0.05 &&
+        Math.abs(tx - s.x) < 0.1 &&
+        Math.abs(ty - s.y) < 0.1;
+
+      if (settled) {
+        s.x = tx;
+        s.y = ty;
+        s.vx = 0;
+        s.vy = 0;
+      } else {
+        allSettled = false;
+      }
+
       const el = this.pupils[i];
       if (el) el.style.transform = `translate(${s.x.toFixed(1)}px, ${s.y.toFixed(1)}px)`;
     });
+
+    if (allSettled) {
+      this.raf = 0;
+      return;
+    }
 
     this.raf = requestAnimationFrame(this.tick);
   };
 
   private scheduleBlink(): void {
-    // Fresh eyes blink every ~3–6s; tired eyes every ~1.5–3s.
+    if (this.blinkTimer !== null) window.clearTimeout(this.blinkTimer);
+    if (document.hidden) {
+      this.blinkTimer = null;
+      return;
+    }
     const t = this.progress;
     const min = 3000 - t * 1500;
     const max = 6000 - t * 3000;
     this.blinkTimer = window.setTimeout(() => {
+      this.blinkTimer = null;
       this.blink();
-      if (t > 0.7 && Math.random() < 0.3) window.setTimeout(() => this.blink(), 320);
+      if (t > 0.7 && Math.random() < 0.3 && !document.hidden) {
+        if (this.doubleBlinkTimer !== null) window.clearTimeout(this.doubleBlinkTimer);
+        this.doubleBlinkTimer = window.setTimeout(() => {
+          this.doubleBlinkTimer = null;
+          this.blink();
+        }, 320);
+      }
       this.scheduleBlink();
     }, min + Math.random() * (max - min));
   }
@@ -393,6 +529,8 @@ export class EyesComponent {
     const x = this.target.x * rx;
     const y = this.target.y * ry + droop;
     const tf = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+    if (tf === this.lastPupilTf) return;
+    this.lastPupilTf = tf;
     for (const p of this.pupils) p.style.transform = tf;
   }
 
@@ -405,36 +543,60 @@ export class EyesComponent {
     const strain = Math.pow(p, 1.3);
 
     const fill = mix(d.sclera[0], d.sclera[1], strain);
-    for (const s of this.sclera) s.setAttribute("fill", fill);
+    if (fill !== this.lastFill) {
+      this.lastFill = fill;
+      for (const s of this.sclera) s.setAttribute("fill", fill);
+    }
 
-    const veinOpacity = p < 0.25 ? 0 : Math.pow((p - 0.25) / 0.75, 1.2);
-    for (const v of this.veins) v.setAttribute("opacity", veinOpacity.toFixed(2));
+    const veinOpacity = (p < 0.25 ? 0 : Math.pow((p - 0.25) / 0.75, 1.2)).toFixed(2);
+    if (veinOpacity !== this.lastVein) {
+      this.lastVein = veinOpacity;
+      for (const v of this.veins) v.setAttribute("opacity", veinOpacity);
+    }
 
-    const blushOpacity = this.progress < 0.2 ? 0 : ((this.progress - 0.2) / 0.8) * 0.55;
-    for (const b of this.blush) b.setAttribute("opacity", blushOpacity.toFixed(2));
+    const blushOpacity = (p < 0.2 ? 0 : ((p - 0.2) / 0.8) * 0.55).toFixed(2);
+    if (blushOpacity !== this.lastBlush) {
+      this.lastBlush = blushOpacity;
+      for (const b of this.blush) b.setAttribute("opacity", blushOpacity);
+    }
 
-    // Tired cats get big pupils
-    for (const s of this.slits) s.setAttribute("rx", (4 + p * 8).toFixed(1));
+    const slitRx = (4 + p * 8).toFixed(1);
+    if (slitRx !== this.lastSlit) {
+      this.lastSlit = slitRx;
+      for (const s of this.slits) s.setAttribute("rx", slitRx);
+    }
 
     if (d.squash) {
       let sy = 1 - (Math.max(0, p - 0.4) / 0.6) * 0.35;
       if (this.mood === "paused") sy = 0.55;
       if (this.blinking) sy = 0.08;
-      for (const s of this.squashes) s.style.transform = `scaleY(${sy.toFixed(2)})`;
+      const squashTf = `scaleY(${sy.toFixed(2)})`;
+      if (squashTf !== this.lastSquash) {
+        this.lastSquash = squashTf;
+        for (const s of this.squashes) s.style.transform = squashTf;
+      }
     } else {
       const open = -12;
       let lid = open;
       if (this.blinking) lid = 2 * d.ry + 4;
       else if (this.mood === "paused") lid = d.ry * 0.8;
       else if (this.mood === "working" && p > 0.5) lid = open + ((p - 0.5) / 0.5) * d.ry * 0.8;
-      for (const l of this.lids) l.style.transform = `translateY(${lid.toFixed(1)}px)`;
+      const lidTf = `translateY(${lid.toFixed(1)}px)`;
+      if (lidTf !== this.lastLid) {
+        this.lastLid = lidTf;
+        for (const l of this.lids) l.style.transform = lidTf;
+      }
     }
 
     if (closed) {
-      this.closedPaths.forEach((path, i) => {
-        const cx = this.centers[i < 2 ? 0 : 1];
-        path.setAttribute("d", closedPath(cx, this.mood, d.closedW));
-      });
+      const closedKey = `${this.mood}:${d.closedW}`;
+      if (closedKey !== this.lastClosedKey) {
+        this.lastClosedKey = closedKey;
+        this.closedPaths.forEach((path, i) => {
+          const cx = this.centers[i < 2 ? 0 : 1];
+          path.setAttribute("d", closedPath(cx, this.mood, d.closedW));
+        });
+      }
     }
 
     this.renderPupils();

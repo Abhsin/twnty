@@ -7,7 +7,36 @@ on:
       - "v*"
 
 jobs:
+  create-release:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.meta.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Determine release tag & ensure draft release exists
+        id: meta
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            TAG="${GITHUB_REF_NAME}"
+          else
+            VERSION=$(node -p "require('./package.json').version")
+            TAG="v${VERSION}"
+          fi
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          if ! gh release view "${TAG}" >/dev/null 2>&1; then
+            gh release create "${TAG}" \
+              --draft \
+              --title "twnty ${TAG}" \
+              --notes "Download the macOS Universal installer (\`.dmg\`) or Windows installer (\`.exe\` / \`.msi\`) below."
+          fi
+
   build-tauri:
+    needs: create-release
     permissions:
       contents: write
     strategy:
@@ -36,14 +65,26 @@ jobs:
       - name: Install frontend dependencies
         run: npm install
 
-      - name: Build Tauri app & bundles (.dmg / .app / .msi / .exe)
+      - name: Build Tauri app & upload installers (.dmg / .exe / .msi)
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: v__VERSION__
-          releaseName: "twnty v__VERSION__"
+          tagName: ${{ needs.create-release.outputs.tag }}
+          releaseName: "twnty ${{ needs.create-release.outputs.tag }}"
           releaseBody: "Download the macOS Universal installer (`.dmg`) or Windows installer (`.exe` / `.msi`) below."
-          releaseDraft: false
+          releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
+
+  publish-release:
+    needs: [create-release, build-tauri]
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release edit "${{ needs.create-release.outputs.tag }}" --draft=false --repo "${{ github.repository }}"

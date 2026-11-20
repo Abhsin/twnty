@@ -1,5 +1,6 @@
 export type TimerPhase = "Working" | "Break" | "Paused";
 export type BreakStyle = "card" | "overlay";
+export type Platform = "macos" | "windows" | "linux";
 
 export interface AppSettings {
   work_duration_secs: number;
@@ -14,7 +15,10 @@ export interface AppSettings {
   launch_at_login: boolean;
   eye_style: string;
   show_tray_timer: boolean;
+  widget_pos?: [number, number] | null;
 }
+
+export type SettingsPatch = Partial<Omit<AppSettings, "widget_pos">>;
 
 export interface DailyStats {
   date: string;
@@ -28,10 +32,12 @@ export interface TimerSnapshot {
   total_secs: number;
   remaining_secs: number;
   progress: number;
-  is_idle_paused: boolean;
-  cursor_norm_x: number;
-  cursor_norm_y: number;
+  is_idle_paused: boolOrFalse;
+  is_demo: boolean;
+  settings_version: number;
+  platform: Platform;
   settings: AppSettings;
   stats: DailyStats;
 }
 
+type boolOrFalse = boolean;

@@ -1,18 +1,22 @@
 use tauri::{
     image::Image,
     menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem, Submenu},
-    tray::{MouseButton, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent},
-    AppHandle, Runtime,
+    tray::{TrayIcon, TrayIconBuilder},
+    AppHandle, Wry,
 };
+
+#[cfg(not(target_os = "macos"))]
+use tauri::tray::{MouseButton, MouseButtonState, TrayIconEvent};
 
 use crate::timer;
 
-pub struct TrayHandles<R: Runtime> {
-    pub tray: TrayIcon<R>,
-    pub status_item: MenuItem<R>,
-    pub pause_item: MenuItem<R>,
-    pub widget_item: MenuItem<R>,
-    pub style_items: Vec<(String, CheckMenuItem<R>)>,
+pub struct TrayHandles {
+    pub tray: TrayIcon<Wry>,
+    pub status_item: MenuItem<Wry>,
+    pub pause_item: MenuItem<Wry>,
+    pub reset_item: MenuItem<Wry>,
+    pub widget_item: MenuItem<Wry>,
+    pub style_items: Vec<(String, CheckMenuItem<Wry>)>,
 }
 
 fn lerp(a: f32, b: f32, t: f32) -> f32 {
@@ -64,9 +68,7 @@ pub fn render_tray_icon_rgba(
         )
     };
 
-    let lid_drop = if is_break {
-        1.15
-    } else if is_paused {
+    let lid_drop = if is_paused {
         0.55
     } else if p > 0.38 {
         ((p - 0.38) / 0.62) * 0.46
@@ -82,6 +84,38 @@ pub fn render_tray_icon_rgba(
             let mut a = 0u8;
 
             for cx in [cx_left, cx_right] {
+                if is_break {
+                    // Draw gentle relaxing closed-eye arc (‿ ‿) with white sticker halo
+                    let arc_rx = if style == "dot" {
+                        width as f32 * 0.13
+                    } else {
+                        rx * 0.85
+                    };
+                    let arc_ry = height as f32 * 0.28;
+                    let nx = (x as f32 + 0.5 - cx) / arc_rx;
+                    let ny = (y as f32 + 0.5 - cy) / arc_ry;
+                    if nx.abs() <= 1.12 {
+                        let curve_y = 0.28 - 0.48 * nx * nx;
+                        let dy = (ny - curve_y).abs();
+                        if dy <= 0.16 && nx.abs() <= 0.94 {
+                            r = 28;
+                            g = 28;
+                            b = 26;
+                            a = 255;
+                        } else if dy <= 0.34 {
+                            let halo = ((0.34 - dy) / 0.18).clamp(0.0, 1.0);
+                            let halo_a = (halo * 240.0) as u8;
+                            if halo_a > a {
+                                r = 255;
+                                g = 255;
+                                b = 255;
+                                a = halo_a;
+                            }
+                        }
+                    }
+                    continue;
+                }
+
                 if style == "dot" {
                     let dot_rx = width as f32 * 0.115;
                     let dot_ry = height as f32 * 0.23 * (1.0 - lid_drop * 0.55).max(0.2);
@@ -90,15 +124,17 @@ pub fn render_tray_icon_rgba(
                     let dist = (nx * nx + ny * ny).sqrt();
                     if dist <= 1.24 {
                         if dist > 0.86 {
-                            // White sticker halo for dark macOS menu bars
                             let halo_a = ((1.24 - dist) / 0.38).clamp(0.0, 1.0);
-                            r = 255;
-                            g = 255;
-                            b = 255;
-                            a = (halo_a * 245.0) as u8;
+                            let ha = (halo_a * 245.0) as u8;
+                            if ha > a {
+                                r = 255;
+                                g = 255;
+                                b = 255;
+                                a = ha;
+                            }
                         } else {
                             let hl = ((nx + 0.28).powi(2) + (ny + 0.32).powi(2)).sqrt();
-                            if hl < 0.32 && !is_break {
+                            if hl < 0.32 {
                                 r = 255;
                                 g = 255;
                                 b = 255;
@@ -129,16 +165,15 @@ pub fn render_tray_icon_rgba(
 
                 if dist <= 1.18 {
                     if dist > 0.98 {
-                        // Outer white sticker halo so dark eye rim pops on dark macOS status bar
                         let halo_alpha = ((1.18 - dist) / 0.20).clamp(0.0, 1.0);
-                        if halo_alpha * 235.0 > a as f32 {
+                        let ha = (halo_alpha * 235.0) as u8;
+                        if ha > a {
                             r = 255;
                             g = 255;
                             b = 255;
-                            a = (halo_alpha * 235.0) as u8;
+                            a = ha;
                         }
                     } else if dist > 0.82 {
-                        // Crisp dark ink outline (#1c1c1a)
                         r = 28;
                         g = 28;
                         b = 26;
@@ -220,15 +255,20 @@ pub fn render_tray_icon_rgba(
     Image::new_owned(buf, width, height)
 }
 
-pub fn create_system_tray<R: Runtime>(
-    app: &AppHandle<R>,
+pub fn create_system_tray(
+    app: &AppHandle<Wry>,
     show_widget_initially: bool,
     initial_style: &str,
-) -> tauri::Result<TrayHandles<R>> {
+    initial_work_secs: u64,
+) -> tauri::Result<TrayHandles> {
     let status_item = MenuItem::with_id(
         app,
         "status",
-        "Next break in 20:00",
+        format!(
+            "Next break in {:02}:{:02}",
+            initial_work_secs / 60,
+            initial_work_secs % 60
+        ),
         false,
         None::<&str>,
     )?;
@@ -240,7 +280,13 @@ pub fn create_system_tray<R: Runtime>(
         None::<&str>,
     )?;
     let pause_item = MenuItem::with_id(app, "pause", "Pause timer", true, None::<&str>)?;
-    let reset_item = MenuItem::with_id(app, "reset", "Reset 20-min timer", true, None::<&str>)?;
+    let reset_item = MenuItem::with_id(
+        app,
+        "reset",
+        format!("Reset {}-min timer", (initial_work_secs / 60).max(1)),
+        true,
+        None::<&str>,
+    )?;
     let widget_label = if show_widget_initially {
         "Hide Floating Eyes"
     } else {
@@ -248,7 +294,6 @@ pub fn create_system_tray<R: Runtime>(
     };
     let widget_item = MenuItem::with_id(app, "toggle_widget", widget_label, true, None::<&str>)?;
 
-    // Eye Style Submenu in the status bar / tray menu
     let styles = [
         ("classic", "Classic"),
         ("googly", "Googly"),
@@ -297,12 +342,10 @@ pub fn create_system_tray<R: Runtime>(
 
     let initial_icon = render_tray_icon_rgba(initial_style, 0.0, false, false);
 
-    // On macOS, clicking a status bar item opens its menu natively;
-    // on Windows, left-clicking opens Settings directly while right-clicking opens the menu.
-    let tray = TrayIconBuilder::with_id("main-tray")
+    let builder = TrayIconBuilder::with_id("main-tray")
         .icon(initial_icon)
         .icon_as_template(false)
-        .tooltip("twnty — 20:00 until next eye break")
+        .tooltip("twnty")
         .menu(&menu)
         .show_menu_on_left_click(cfg!(target_os = "macos"))
         .on_menu_event(|app, event| {
@@ -312,46 +355,35 @@ pub fn create_system_tray<R: Runtime>(
                 return;
             }
             match id {
-                "break_now" => {
-                    timer::trigger_break_from_app(app);
-                }
-                "pause" => {
-                    timer::toggle_pause_from_app(app);
-                }
-                "reset" => {
-                    timer::reset_timer_from_app(app);
-                }
-                "toggle_widget" => {
-                    timer::toggle_floating_widget_from_app(app);
-                }
-                "settings" => {
-                    timer::show_settings_from_app(app);
-                }
-                "quit" => {
-                    app.exit(0);
-                }
+                "break_now" => timer::trigger_break_from_app(app),
+                "pause" => timer::toggle_pause_from_app(app),
+                "reset" => timer::reset_timer_from_app(app),
+                "toggle_widget" => timer::toggle_floating_widget_from_app(app),
+                "settings" => timer::show_settings_window(app),
+                "quit" => app.exit(0),
                 _ => {}
             }
-        })
-        .on_tray_icon_event(|tray, event| {
-            #[cfg(not(target_os = "macos"))]
-            if let TrayIconEvent::Click {
-                button: MouseButton::Left,
-                button_state: MouseButtonState::Up,
-                ..
-            } = event
-            {
-                timer::show_settings_from_app(tray.app_handle());
-            }
-            #[cfg(target_os = "macos")]
-            let _ = (tray, event);
-        })
-        .build(app)?;
+        });
+
+    #[cfg(not(target_os = "macos"))]
+    let builder = builder.on_tray_icon_event(|tray, event| {
+        if let TrayIconEvent::Click {
+            button: MouseButton::Left,
+            button_state: MouseButtonState::Up,
+            ..
+        } = event
+        {
+            timer::show_settings_window(tray.app_handle());
+        }
+    });
+
+    let tray = builder.build(app)?;
 
     Ok(TrayHandles {
         tray,
         status_item,
         pause_item,
+        reset_item,
         widget_item,
         style_items,
     })

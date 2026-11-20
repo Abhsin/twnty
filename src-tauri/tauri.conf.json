@@ -11,53 +11,9 @@
   },
   "app": {
     "macOSPrivateApi": true,
-    "windows": [
-      {
-        "label": "break",
-        "title": "20-20-20 Break",
-        "url": "break.html",
-        "width": 440,
-        "height": 420,
-        "resizable": false,
-        "decorations": false,
-        "transparent": true,
-        "shadow": false,
-        "alwaysOnTop": true,
-        "visible": false,
-        "skipTaskbar": true,
-        "center": true
-      },
-      {
-        "label": "widget",
-        "title": "twnty Eyes",
-        "url": "widget.html",
-        "width": 196,
-        "height": 136,
-        "resizable": false,
-        "decorations": false,
-        "transparent": true,
-        "shadow": false,
-        "alwaysOnTop": true,
-        "visible": false,
-        "skipTaskbar": true
-      },
-      {
-        "label": "settings",
-        "title": "twnty",
-        "url": "settings.html",
-        "width": 480,
-        "height": 800,
-        "minWidth": 420,
-        "minHeight": 560,
-        "resizable": true,
-        "decorations": true,
-        "transparent": false,
-        "visible": false,
-        "center": true
-      }
-    ],
+    "windows": [],
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'"
     }
   },
   "bundle": {
@@ -73,4 +29,3 @@
     ]
   }
 }
-
