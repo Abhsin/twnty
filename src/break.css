@@ -11,6 +11,12 @@ body {
   align-items: center;
   justify-content: center;
   padding: 24px;
+  opacity: 0;
+  transition: opacity 0.14s ease;
+}
+
+.break.is-ready {
+  opacity: 1;
 }
 
 .sheet {

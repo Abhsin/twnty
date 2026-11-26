@@ -7,7 +7,6 @@ import type { TimerSnapshot } from "./types";
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
 const root = $("root");
-const sheet = document.querySelector(".sheet") as HTMLElement;
 const eyesEl = $("eyes");
 const title = $("title");
 const hint = $("hint");
@@ -16,8 +15,6 @@ const fill = $("bar-fill");
 const skip = $<HTMLButtonElement>("skip");
 const plus = $<HTMLButtonElement>("plus");
 const sep = $("sep");
-
-const dragEls = [sheet, eyesEl, title, hint, secs];
 
 const eyes = new EyesComponent(eyesEl, {
   mood: "relaxing",
@@ -64,16 +61,6 @@ function stopHints(): void {
   hint.classList.remove("fade");
 }
 
-function setDragEnabled(enabled: boolean): void {
-  for (const el of dragEls) {
-    if (enabled) {
-      el.setAttribute("data-tauri-drag-region", "");
-    } else {
-      el.removeAttribute("data-tauri-drag-region");
-    }
-  }
-}
-
 let lastPhase = "";
 let done = false;
 
@@ -82,7 +69,7 @@ function render(s: TimerSnapshot): void {
   const overlay = s.settings.break_style === "overlay";
   root.classList.toggle("mode-overlay", overlay);
   root.classList.toggle("mode-card", !overlay);
-  setDragEnabled(!overlay);
+  root.classList.add("is-ready");
 
   skip.classList.toggle("hidden", s.settings.strict_mode);
   sep.classList.toggle("hidden", s.settings.strict_mode);

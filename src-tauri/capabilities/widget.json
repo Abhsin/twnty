@@ -1,0 +1,9 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "widget",
+  "description": "Allow dragging only for the floating widget window",
+  "windows": ["widget"],
+  "permissions": [
+    "core:window:allow-start-dragging"
+  ]
+}

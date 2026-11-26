@@ -349,20 +349,26 @@ pub fn create_system_tray(
         .menu(&menu)
         .show_menu_on_left_click(cfg!(target_os = "macos"))
         .on_menu_event(|app, event| {
-            let id = event.id().as_ref();
-            if let Some(style_id) = id.strip_prefix("style_") {
-                timer::set_eye_style_from_app(app, style_id);
+            let id = event.id().as_ref().to_string();
+            if id == "quit" {
+                app.exit(0);
                 return;
             }
-            match id {
-                "break_now" => timer::trigger_break_from_app(app),
-                "pause" => timer::toggle_pause_from_app(app),
-                "reset" => timer::reset_timer_from_app(app),
-                "toggle_widget" => timer::toggle_floating_widget_from_app(app),
-                "settings" => timer::show_settings_window(app),
-                "quit" => app.exit(0),
-                _ => {}
-            }
+            let app = app.clone();
+            std::thread::spawn(move || {
+                if let Some(style_id) = id.strip_prefix("style_") {
+                    timer::set_eye_style_from_app(&app, style_id);
+                    return;
+                }
+                match id.as_str() {
+                    "break_now" => timer::trigger_break_from_app(&app),
+                    "pause" => timer::toggle_pause_from_app(&app),
+                    "reset" => timer::reset_timer_from_app(&app),
+                    "toggle_widget" => timer::toggle_floating_widget_from_app(&app),
+                    "settings" => timer::show_settings_window(&app),
+                    _ => {}
+                }
+            });
         });
 
     #[cfg(not(target_os = "macos"))]
@@ -373,7 +379,8 @@ pub fn create_system_tray(
             ..
         } = event
         {
-            timer::show_settings_window(tray.app_handle());
+            let app = tray.app_handle().clone();
+            std::thread::spawn(move || timer::show_settings_window(&app));
         }
     });
 

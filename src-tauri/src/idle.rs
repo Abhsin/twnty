@@ -60,6 +60,13 @@ mod win {
         fn GetClassNameW(hwnd: isize, lp_class_name: *mut u16, n_max_count: i32) -> i32;
         fn OpenInputDesktop(dw_flags: u32, f_inherit: i32, dw_desired_access: u32) -> isize;
         fn CloseDesktop(h_desktop: isize) -> i32;
+        fn GetUserObjectInformationW(
+            h_obj: isize,
+            n_index: i32,
+            pv_info: *mut u16,
+            n_length: u32,
+            lpn_length_needed: *mut u32,
+        ) -> i32;
     }
 
     #[link(name = "kernel32")]
@@ -110,14 +117,29 @@ mod win {
     }
 
     pub fn is_screen_locked() -> bool {
-        const DESKTOP_SWITCHDESKTOP: u32 = 0x0100;
+        const DESKTOP_READOBJECTS: u32 = 0x0001;
+        const UOI_NAME: i32 = 2;
         unsafe {
-            let hdesk = OpenInputDesktop(0, 0, DESKTOP_SWITCHDESKTOP);
-            if hdesk == 0 {
-                true
-            } else {
+            let hdesk = OpenInputDesktop(0, 0, DESKTOP_READOBJECTS);
+            if hdesk != 0 {
+                let mut buf = [0u16; 64];
+                let mut needed: u32 = 0;
+                let ok = GetUserObjectInformationW(
+                    hdesk,
+                    UOI_NAME,
+                    buf.as_mut_ptr(),
+                    (buf.len() * 2) as u32,
+                    &mut needed,
+                );
                 CloseDesktop(hdesk);
+                if ok != 0 && needed >= 2 {
+                    let chars = ((needed as usize) / 2).saturating_sub(1).min(buf.len());
+                    let name = String::from_utf16_lossy(&buf[..chars]).to_lowercase();
+                    return matches!(name.as_str(), "winlogon" | "screen-saver");
+                }
                 false
+            } else {
+                GetLastError() == 5 && GetForegroundWindow() == 0
             }
         }
     }

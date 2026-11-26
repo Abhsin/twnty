@@ -20,12 +20,12 @@ fn get_timer_snapshot(state: State<'_, SharedAppState>) -> TimerSnapshot {
 }
 
 #[tauri::command]
-fn start_break_now(app: AppHandle) {
+async fn start_break_now(app: AppHandle) {
     start_break_now_impl(&app);
 }
 
 #[tauri::command]
-fn skip_break(app: AppHandle, state: State<'_, SharedAppState>) {
+async fn skip_break(app: AppHandle, state: State<'_, SharedAppState>) -> Result<(), ()> {
     let result = {
         let mut guard = lock_state(&state);
         if guard.settings.strict_mode {
@@ -56,6 +56,7 @@ fn skip_break(app: AppHandle, state: State<'_, SharedAppState>) {
         }
         apply_sync(&app, &snap, diff);
     }
+    Ok(())
 }
 
 #[tauri::command]
@@ -76,21 +77,21 @@ fn extend_break(app: AppHandle, state: State<'_, SharedAppState>, extra_secs: u6
 }
 
 #[tauri::command]
-fn toggle_pause(app: AppHandle) {
+async fn toggle_pause(app: AppHandle) {
     toggle_pause_from_app(&app);
 }
 
 #[tauri::command]
-fn reset_timer(app: AppHandle) {
+async fn reset_timer(app: AppHandle) {
     reset_timer_from_app(&app);
 }
 
 #[tauri::command]
-fn patch_settings(
+async fn patch_settings(
     app: AppHandle,
     state: State<'_, SharedAppState>,
     patch: SettingsPatch,
-) -> TimerSnapshot {
+) -> Result<TimerSnapshot, ()> {
     let mut autostart_update: Option<bool> = None;
 
     let (snap, diff, widget_sync, cfg, settings, ver) = {
@@ -178,15 +179,15 @@ fn patch_settings(
         sync_widget_window(&app, show, pos);
     }
     apply_sync(&app, &snap, diff);
-    snap
+    Ok(snap)
 }
 
 #[tauri::command]
-fn toggle_demo_mode(app: AppHandle, state: State<'_, SharedAppState>) -> TimerSnapshot {
+async fn toggle_demo_mode(app: AppHandle, state: State<'_, SharedAppState>) -> Result<TimerSnapshot, ()> {
     let result = {
         let mut guard = lock_state(&state);
         if guard.phase == TimerPhase::Break && guard.settings.strict_mode {
-            return guard.snapshot();
+            return Ok(guard.snapshot());
         }
         let should_close = guard.phase == TimerPhase::Break;
         if should_close {
@@ -202,16 +203,16 @@ fn toggle_demo_mode(app: AppHandle, state: State<'_, SharedAppState>) -> TimerSn
         close_break_window(&app);
     }
     apply_sync(&app, &result.0, result.1);
-    result.0
+    Ok(result.0)
 }
 
 #[tauri::command]
-fn set_eye_style(app: AppHandle, style_id: String) {
+async fn set_eye_style(app: AppHandle, style_id: String) {
     set_eye_style_from_app(&app, &style_id);
 }
 
 #[tauri::command]
-fn open_settings_window(app: AppHandle) {
+async fn open_settings_window(app: AppHandle) {
     show_settings_window(&app);
 }
 

@@ -7,8 +7,7 @@ use std::time::{Duration, Instant, SystemTime};
 use chrono::Local;
 use serde::{Deserialize, Serialize};
 use tauri::{
-    AppHandle, Emitter, Manager, PhysicalPosition, PhysicalSize, WebviewUrl, WebviewWindow,
-    WebviewWindowBuilder,
+    AppHandle, Emitter, Manager, PhysicalPosition, PhysicalSize, WebviewUrl, WebviewWindowBuilder,
 };
 
 use crate::idle::{self, ScreenPoint};
@@ -17,6 +16,7 @@ use crate::tray::{render_tray_icon_rgba, TrayHandles};
 static SETTINGS_IO_LOCK: Mutex<()> = Mutex::new(());
 static SAVED_SETTINGS_VER: AtomicU64 = AtomicU64::new(0);
 static STATS_IO_LOCK: Mutex<()> = Mutex::new(());
+static WINDOW_OP_LOCK: Mutex<()> = Mutex::new(());
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum TimerPhase {
@@ -477,6 +477,7 @@ pub fn apply_sync(app: &AppHandle, snap: &TimerSnapshot, diff: TrayDiff) {
 }
 
 pub fn show_settings_window(app: &AppHandle) {
+    let _win_lock = WINDOW_OP_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     if let Some(win) = app.get_webview_window("settings") {
         let _ = win.unminimize();
         let _ = win.show();
@@ -523,37 +524,8 @@ fn find_monitor_for_point(
     }
 }
 
-fn position_widget_window(win: &WebviewWindow, saved_pos: Option<(i32, i32)>) {
-    let monitors = win.available_monitors().unwrap_or_default();
-    if let Some((sx, sy)) = saved_pos {
-        let valid = monitors.iter().any(|m| {
-            let pos = m.position();
-            let size = m.size();
-            sx >= pos.x - 100
-                && sx < pos.x + size.width as i32 - 40
-                && sy >= pos.y - 40
-                && sy < pos.y + size.height as i32 - 40
-        });
-        if valid {
-            let _ = win.set_position(PhysicalPosition::new(sx, sy));
-            return;
-        }
-    }
-
-    if let Ok(Some(mon)) = win.primary_monitor() {
-        let pos = mon.position();
-        let size = mon.size();
-        let scale = mon.scale_factor();
-        let widget_w = (196.0 * scale) as i32;
-        let margin = (20.0 * scale) as i32;
-        let top = (36.0 * scale) as i32;
-        let x = pos.x + (size.width as i32 - widget_w - margin).max(margin);
-        let y = pos.y + top;
-        let _ = win.set_position(PhysicalPosition::new(x, y));
-    }
-}
-
 pub fn sync_widget_window(app: &AppHandle, show: bool, saved_pos: Option<(i32, i32)>) {
+    let _win_lock = WINDOW_OP_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     if !show {
         if let Some(win) = app.get_webview_window("widget") {
             let _ = win.destroy();
@@ -566,8 +538,46 @@ pub fn sync_widget_window(app: &AppHandle, show: bool, saved_pos: Option<(i32, i
         return;
     }
 
+    let monitors = app.available_monitors().unwrap_or_default();
+    let primary = app.primary_monitor().ok().flatten();
+    let primary_scale = primary.as_ref().map(|m| m.scale_factor()).unwrap_or(1.0);
+
+    let saved_match = saved_pos.and_then(|(sx, sy)| {
+        monitors
+            .iter()
+            .find(|m| {
+                let pos = m.position();
+                let size = m.size();
+                sx >= pos.x - 100
+                    && sx < pos.x + size.width as i32 - 40
+                    && sy >= pos.y - 40
+                    && sy < pos.y + size.height as i32 - 40
+            })
+            .map(|m| (sx, sy, m.scale_factor()))
+    });
+
+    let (target_x, target_y, mon_scale) = if let Some((sx, sy, scale)) = saved_match {
+        (sx, sy, scale)
+    } else if let Some(ref mon) = primary.as_ref().or_else(|| monitors.first()) {
+        let pos = mon.position();
+        let size = mon.size();
+        let scale = mon.scale_factor();
+        let widget_w = (196.0 * scale) as i32;
+        let margin = (20.0 * scale) as i32;
+        let top = (36.0 * scale) as i32;
+        let x = pos.x + (size.width as i32 - widget_w - margin).max(margin);
+        let y = pos.y + top;
+        (x, y, scale)
+    } else {
+        (100, 100, primary_scale)
+    };
+
+    let target_w = (196.0 * mon_scale) as u32;
+    let target_h = (136.0 * mon_scale) as u32;
+
     if let Ok(win) = WebviewWindowBuilder::new(app, "widget", WebviewUrl::App("widget.html".into()))
         .title("twnty Eyes")
+        .position(target_x as f64 / primary_scale, target_y as f64 / primary_scale)
         .inner_size(196.0, 136.0)
         .resizable(false)
         .decorations(false)
@@ -581,19 +591,61 @@ pub fn sync_widget_window(app: &AppHandle, show: bool, saved_pos: Option<(i32, i
         #[cfg(target_os = "macos")]
         let _ = win.set_visible_on_all_workspaces(true);
 
-        position_widget_window(&win, saved_pos);
+        let _ = win.set_position(PhysicalPosition::new(target_x, target_y));
+        let _ = win.set_size(PhysicalSize::new(target_w, target_h));
         let _ = win.show();
     }
 }
 
 pub fn present_break_window(app: &AppHandle, break_style: &str) {
+    let _win_lock = WINDOW_OP_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+
+    let monitors = app.available_monitors().unwrap_or_default();
+    let primary = app.primary_monitor().ok().flatten();
+    let primary_scale = primary.as_ref().map(|m| m.scale_factor()).unwrap_or(1.0);
+    let cursor = idle::get_cursor_screen_pos();
+    let active_mon = cursor
+        .and_then(|pt| find_monitor_for_point(&monitors, pt).cloned())
+        .or_else(|| primary.clone())
+        .or_else(|| monitors.first().cloned());
+
+    let (target_x, target_y, target_w, target_h, init_w, init_h) = if break_style == "overlay" {
+        if let Some(ref mon) = active_mon {
+            let pos = mon.position();
+            let size = mon.size();
+            let scale = mon.scale_factor();
+            (
+                pos.x,
+                pos.y,
+                size.width,
+                size.height,
+                size.width as f64 / scale,
+                size.height as f64 / scale,
+            )
+        } else {
+            (0, 0, 1280, 800, 1280.0, 800.0)
+        }
+    } else if let Some(ref mon) = active_mon {
+        let scale = mon.scale_factor();
+        let w = (440.0 * scale) as u32;
+        let h = (420.0 * scale) as u32;
+        let pos = mon.position();
+        let size = mon.size();
+        let x = pos.x + (size.width as i32 - w as i32) / 2;
+        let y = pos.y + (size.height as i32 - h as i32) / 2;
+        (x, y, w, h, 440.0, 420.0)
+    } else {
+        (200, 200, 440, 420, 440.0, 420.0)
+    };
+
     let win = if let Some(existing) = app.get_webview_window("break") {
         existing
     } else if let Ok(created) =
         WebviewWindowBuilder::new(app, "break", WebviewUrl::App("break.html".into()))
             .title("20-20-20 Break")
-            .inner_size(440.0, 420.0)
-            .resizable(false)
+            .position(target_x as f64 / primary_scale, target_y as f64 / primary_scale)
+            .inner_size(init_w, init_h)
+            .resizable(true)
             .decorations(false)
             .transparent(true)
             .shadow(false)
@@ -609,44 +661,20 @@ pub fn present_break_window(app: &AppHandle, break_style: &str) {
         return;
     };
 
-    let cursor = idle::get_cursor_screen_pos();
-    let monitors = win.available_monitors().unwrap_or_default();
-    let active_mon = cursor
-        .and_then(|pt| find_monitor_for_point(&monitors, pt))
-        .or_else(|| monitors.first());
-
-    if break_style == "overlay" {
-        if let Some(mon) = active_mon {
-            let pos = mon.position();
-            let size = mon.size();
-            let _ = win.set_size(PhysicalSize::new(size.width, size.height));
-            let _ = win.set_position(PhysicalPosition::new(pos.x, pos.y));
-        } else {
-            let _ = win.set_size(tauri::LogicalSize::new(1280.0, 800.0));
-            let _ = win.center();
-        }
-    } else {
-        let scale = active_mon.map(|m| m.scale_factor()).unwrap_or(1.0);
-        let card_w = (440.0 * scale) as u32;
-        let card_h = (420.0 * scale) as u32;
-        let _ = win.set_size(PhysicalSize::new(card_w, card_h));
-
-        if let Some(mon) = active_mon {
-            let pos = mon.position();
-            let size = mon.size();
-            let x = pos.x + (size.width as i32 - card_w as i32) / 2;
-            let y = pos.y + (size.height as i32 - card_h as i32) / 2;
-            let _ = win.set_position(PhysicalPosition::new(x, y));
-        } else {
-            let _ = win.center();
-        }
-    }
-
+    let _ = win.set_resizable(true);
+    let _ = win.set_position(PhysicalPosition::new(target_x, target_y));
+    let _ = win.set_size(PhysicalSize::new(target_w, target_h));
     let _ = win.show();
     let _ = win.set_focus();
+
+    std::thread::sleep(Duration::from_millis(40));
+    let _ = win.set_position(PhysicalPosition::new(target_x, target_y));
+    let _ = win.set_size(PhysicalSize::new(target_w, target_h));
+    let _ = win.set_resizable(false);
 }
 
 pub fn close_break_window(app: &AppHandle) {
+    let _win_lock = WINDOW_OP_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     if let Some(win) = app.get_webview_window("break") {
         let _ = win.destroy();
     }
@@ -913,20 +941,18 @@ pub fn spawn_background_loops(app: AppHandle) {
                                 }
                             }
                             TimerPhase::Break => {
-                                if !(guard.settings.idle_detection_enabled && locked) {
-                                    guard.elapsed_secs = guard.elapsed_secs.saturating_add(1);
-                                    if guard.elapsed_secs >= guard.total_secs {
-                                        guard.stats.breaks_completed += 1;
-                                        stats_to_save =
-                                            Some((guard.config_dir.clone(), guard.stats.clone()));
-                                        guard.reset_to_work();
-                                        let gen = guard.break_gen;
-                                        let snap_diff = prepare_sync(&mut guard);
-                                        completed_info = Some((snap_diff.0.clone(), gen));
-                                        sync_payload = Some(snap_diff);
-                                    } else {
-                                        sync_payload = Some(prepare_sync(&mut guard));
-                                    }
+                                guard.elapsed_secs = guard.elapsed_secs.saturating_add(1);
+                                if guard.elapsed_secs >= guard.total_secs {
+                                    guard.stats.breaks_completed += 1;
+                                    stats_to_save =
+                                        Some((guard.config_dir.clone(), guard.stats.clone()));
+                                    guard.reset_to_work();
+                                    let gen = guard.break_gen;
+                                    let snap_diff = prepare_sync(&mut guard);
+                                    completed_info = Some((snap_diff.0.clone(), gen));
+                                    sync_payload = Some(snap_diff);
+                                } else {
+                                    sync_payload = Some(prepare_sync(&mut guard));
                                 }
                             }
                             TimerPhase::Paused => {
