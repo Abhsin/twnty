@@ -10,7 +10,10 @@
     "build:exe": "npm run build && cargo build --release --manifest-path src-tauri/Cargo.toml --features tauri/custom-protocol",
     "start": "src-tauri\\target\\release\\twnty.exe",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "web:dev": "vite --config vite.web.config.ts",
+    "web:build": "tsc -p tsconfig.web.json && vite build --config vite.web.config.ts",
+    "web:preview": "vite preview --config vite.web.config.ts"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.2.0"

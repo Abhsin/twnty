@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>twnty — A tiny desktop companion for the 20-20-20 rule</title>
+    <meta
+      name="description"
+      content="Every 20 minutes, look at something 20 feet away for 20 seconds. A tiny, open-source macOS &amp; Windows menu-bar companion whose eyes gently remind you to rest."
+    />
+    <link rel="canonical" href="https://twnty.app/" />
+    <meta name="theme-color" content="#f7f6f3" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#151514" media="(prefers-color-scheme: dark)" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://twnty.app/" />
+    <meta property="og:site_name" content="twnty" />
+    <meta property="og:title" content="twnty — A tiny desktop companion for the 20-20-20 rule" />
+    <meta
+      property="og:description"
+      content="Friendly eyes in your menu bar that slowly tire over 20 minutes, then guide you through a calm 20-second break."
+    />
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="twnty — A tiny desktop companion for the 20-20-20 rule" />
+    <meta
+      name="twitter:description"
+      content="Every 20 minutes, look 20 feet away for 20 seconds. Free, open-source for macOS &amp; Windows."
+    />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="#top" aria-label="twnty home">
+          <svg
+            class="brand-mark"
+            width="28"
+            height="18"
+            viewBox="0 0 28 18"
+            fill="none"
+            aria-hidden="true"
+          >
+            <ellipse
+              cx="8.5"
+              cy="9"
+              rx="6"
+              ry="7.5"
+              fill="#ffffff"
+              stroke="currentColor"
+              stroke-width="2"
+            />
+            <ellipse
+              cx="19.5"
+              cy="9"
+              rx="6"
+              ry="7.5"
+              fill="#ffffff"
+              stroke="currentColor"
+              stroke-width="2"
+            />
+            <circle cx="8.5" cy="9.2" r="2.5" fill="#1c1c1a" />
+            <circle cx="19.5" cy="9.2" r="2.5" fill="#1c1c1a" />
+          </svg>
+          <span>twnty</span>
+        </a>
+
+        <nav class="header-actions" aria-label="Primary links">
+          <a
+            class="nav-link"
+            href="https://github.com/Abhsin/twnty"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            GitHub
+          </a>
+          <button
+            id="theme-toggle"
+            class="icon-btn"
+            type="button"
+            aria-label="Toggle light or dark theme"
+            title="Toggle theme"
+          >
+            <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+            </svg>
+            <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+            </svg>
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <main id="top" class="page">
+      <section class="hero">
+        <button
+          id="hero-eyes"
+          class="hero-eyes"
+          type="button"
+          aria-label="Interactive twnty eyes — move cursor to look around, click to blink"
+          title="Click to blink"
+        ></button>
+
+        <h1>Your eyes need a break every 20 minutes.</h1>
+        <p class="hero-sub">
+          A tiny, open-source companion in your menu bar that slowly tires with you—then gently
+          reminds you to look 20 feet away for 20 seconds.
+        </p>
+
+        <div class="hero-ctas">
+          <a
+            id="dl-primary"
+            class="btn btn-primary"
+            href="https://github.com/Abhsin/twnty/releases/latest"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span id="dl-primary-icon" class="btn-icon" aria-hidden="true"></span>
+            <span id="dl-primary-label">Download for macOS</span>
+          </a>
+          <a
+            id="dl-secondary"
+            class="btn btn-secondary"
+            href="https://github.com/Abhsin/twnty/releases/latest"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span id="dl-secondary-icon" class="btn-icon" aria-hidden="true"></span>
+            <span id="dl-secondary-label">Download for Windows</span>
+          </a>
+        </div>
+
+        <p id="release-meta" class="meta-line">
+          v0.1.0 · macOS Universal &amp; Windows · Free &amp; MIT open source ·
+          <a
+            class="link"
+            href="https://github.com/Abhsin/twnty/releases/latest"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Release notes
+          </a>
+        </p>
+      </section>
+
+      <section class="playground" aria-label="Interactive eye fatigue and style demo">
+        <div class="playground-card">
+          <div class="menubar-strip">
+            <span class="menubar-caption">Live menu-bar &amp; tray preview</span>
+            <div class="menubar-pill">
+              <div id="tray-eyes" class="tray-eyes" aria-hidden="true"></div>
+              <span id="sim-clock" class="sim-clock">20:00</span>
+              <span class="pill-sep" aria-hidden="true"></span>
+              <button id="preview-break-btn" class="preview-pill-btn" type="button">
+                Preview 20s break
+              </button>
+            </div>
+          </div>
+
+          <div class="scrubber-block">
+            <div class="scrubber-head">
+              <label for="strain-slider" class="scrubber-title">Simulate 20-minute work cycle</label>
+              <span id="strain-readout" class="strain-readout">0 min · Fresh &amp; clear</span>
+            </div>
+            <input
+              id="strain-slider"
+              class="strain-slider"
+              type="range"
+              min="0"
+              max="100"
+              value="0"
+            />
+            <div class="presets" role="group" aria-label="Strain presets">
+              <button class="preset-btn is-active" type="button" data-strain="0">0m Fresh</button>
+              <button class="preset-btn" type="button" data-strain="50">10m Working</button>
+              <button class="preset-btn" type="button" data-strain="85">17m Tired</button>
+              <button class="preset-btn" type="button" data-strain="100">20m Break due</button>
+            </div>
+          </div>
+
+          <div class="styles-block">
+            <div class="styles-head">
+              <span class="scrubber-title">5 selectable eye styles</span>
+              <span class="styles-hint">Move cursor · click eyes to blink</span>
+            </div>
+            <div id="style-picker" class="styles" role="radiogroup" aria-label="Eye style"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="rule-section" aria-label="The 20-20-20 rule">
+        <div class="rule-grid">
+          <article class="rule-item">
+            <div class="rule-num">20 min</div>
+            <h3>Every 20 minutes</h3>
+            <p>
+              The eyes sit quietly in your menu bar, reddening and drooping as screen time builds.
+            </p>
+          </article>
+          <article class="rule-item">
+            <div class="rule-num">20 feet</div>
+            <h3>Look 20 feet away</h3>
+            <p>
+              Let your focus soften onto a distant window, tree, or wall across the room.
+            </p>
+          </article>
+          <article class="rule-item">
+            <div class="rule-num">20 sec</div>
+            <h3>For 20 seconds</h3>
+            <p>
+              Breathe through the calm countdown until a soft chime plays and the eyes wake clear.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="features-section" aria-label="Features">
+        <h2 class="section-heading">Thoughtfully built</h2>
+        <div class="feature-grid">
+          <article class="feature-card">
+            <h3>Menu bar &amp; system tray</h3>
+            <p>
+              Dynamic high-DPI eye icons with 10 progressive fatigue stages and an optional live
+              countdown on macOS.
+            </p>
+          </article>
+          <article class="feature-card">
+            <h3>Optional floating eyes</h3>
+            <p>
+              Pin transparent SVG eyes anywhere on your desktop—they blink naturally, track your
+              cursor, and smile after breaks.
+            </p>
+          </article>
+          <article class="feature-card">
+            <h3>Card or full-screen break</h3>
+            <p>
+              Choose a centered floating card or a full-screen breathing field, with strict mode if
+              you want no skip button.
+            </p>
+          </article>
+          <article class="feature-card">
+            <h3>Pauses when you step away</h3>
+            <p>
+              Automatic idle and screen-lock detection pauses after 5 minutes away and resets fresh
+              when you return.
+            </p>
+          </article>
+          <article class="feature-card">
+            <h3>Respects full-screen apps</h3>
+            <p>
+              Defers popup windows during videos, games, or presentations and sends a quiet native
+              notification instead.
+            </p>
+          </article>
+          <article class="feature-card">
+            <h3>Native Rust, zero bloat</h3>
+            <p>
+              Background timer runs in Rust with local-only settings and stats. No accounts, no
+              cloud, no telemetry.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="bottom-cta">
+        <h2>Give your eyes a break.</h2>
+        <p class="bottom-sub">Free, open source, and ready for macOS and Windows.</p>
+        <div class="hero-ctas">
+          <a
+            id="dl-bottom-mac"
+            class="btn btn-primary"
+            href="https://github.com/Abhsin/twnty/releases/latest"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Download for macOS
+          </a>
+          <a
+            id="dl-bottom-win"
+            class="btn btn-secondary"
+            href="https://github.com/Abhsin/twnty/releases/latest"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Download for Windows
+          </a>
+          <a
+            class="btn btn-ghost"
+            href="https://github.com/Abhsin/twnty"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Source on GitHub
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>twnty.app</span>
+      <span aria-hidden="true">·</span>
+      <a
+        class="link"
+        href="https://github.com/Abhsin/twnty/blob/main/LICENSE"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        MIT License
+      </a>
+      <span aria-hidden="true">·</span>
+      <a
+        class="link"
+        href="https://github.com/Abhsin/twnty"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        GitHub
+      </a>
+      <span aria-hidden="true">·</span>
+      <a
+        class="link"
+        href="https://github.com/Abhsin/twnty/releases/latest"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Releases
+      </a>
+    </footer>
+
+    <div
+      id="break-modal"
+      class="break-modal mode-card hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+    >
+      <div class="break-modal-toolbar">
+        <div class="seg" role="group" aria-label="Break preview style">
+          <button id="modal-mode-card" class="is-active" type="button">Card</button>
+          <button id="modal-mode-overlay" type="button">Full screen</button>
+        </div>
+
+        <div class="toolbar-right">
+          <button id="modal-sound-toggle" class="toolbar-btn" type="button" aria-pressed="true">
+            Sound on
+          </button>
+          <button id="modal-close-x" class="toolbar-btn" type="button" aria-label="Close preview">
+            Close
+          </button>
+        </div>
+      </div>
+
+      <div class="break-sheet">
+        <div id="modal-eyes" class="modal-eyes" aria-hidden="true"></div>
+        <h2 id="modal-title">Look at something far away</h2>
+        <p id="modal-hint" class="modal-hint">About 20 feet. Let your eyes go soft.</p>
+        <div id="modal-secs" class="modal-count">20</div>
+        <div class="modal-bar"><div id="modal-bar-fill" class="modal-bar-fill"></div></div>
+        <div class="modal-actions">
+          <button id="modal-plus" type="button">+10 s</button>
+          <span id="modal-sep" class="modal-sep" aria-hidden="true">·</span>
+          <button id="modal-skip" type="button">Finish preview</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
