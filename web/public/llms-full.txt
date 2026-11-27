@@ -1,0 +1,69 @@
+# twnty
+
+> twnty is a free, open-source (MIT) desktop app for macOS and Windows that reminds you to follow the 20-20-20 rule: every 20 minutes, look at something 20 feet away for 20 seconds.
+
+Website: https://twnty.app/
+Source: https://github.com/Abhsin/twnty
+Guide: https://twnty.app/20-20-20-rule
+
+## What it is
+
+A tiny desktop companion for the 20-20-20 rule. A pair of friendly eyes lives in your menu bar (macOS) or system tray (Windows), and optionally floats on your desktop. They slowly turn bloodshot red and droop as 20 minutes pass. When time is up, a gentle reminder appears with a 20-second breathing countdown and a soft singing-bowl chime, and the eyes wake up fresh and clear white.
+
+## Who it is for
+
+People who spend long hours at a screen and want a gentle, low-friction nudge to rest their eyes: developers, designers, writers, students, and anyone prone to digital eye strain.
+
+## Price and license
+
+Free. MIT license. No paid tier.
+
+## Platforms
+
+- macOS: Apple Silicon and Intel (universal build), distributed as a .dmg
+- Windows: x64, distributed as a setup .exe or an .msi
+
+## Features in detail
+
+- Five selectable eye styles: Classic; Googly (spring-physics pupils); Cat (dilating vertical slits); Sparkle (anime style); Dot (minimalist ink dots with blushing cheeks).
+- macOS status bar and Windows system tray icon: 10 progressive redness stages, rendered at Retina resolution on macOS (60x44 @2x) and 48x48 on Windows, with a subtle white sticker halo so it reads on light and dark menu bars. An optional live countdown can be shown next to the eyes on macOS.
+- Floating desktop companion (optional): transparent, always-on-top, draggable SVG eyes that blink naturally, get sleepier near 20 minutes, track your cursor across the screen, and smile when you finish a break.
+- Configurable break reminder: a Card centered on your active monitor, or Full screen with a calm field of color for deeper rest.
+- Rust-powered state machine: the timer runs natively in Rust, so hidden webviews never throttle the countdown.
+- Pause when away: automatically pauses after 5 minutes without input and resets after a long absence.
+- Respect full screen: defers popup windows and sends a quiet notification during full-screen apps, games, and presentations.
+- Multi-monitor aware: opens the break reminder on whichever display your cursor is on.
+- Strict mode: optionally hides the Skip button.
+- Daily stats and settings: track breaks taken vs. skipped today and customize work and rest intervals, including a 20-second demo mode.
+
+## Privacy
+
+No accounts and no telemetry. Settings and stats are stored locally on your device.
+
+## Download
+
+- All releases: https://github.com/Abhsin/twnty/releases/latest
+- macOS universal: https://github.com/Abhsin/twnty/releases/latest/download/twnty_0.1.0_universal.dmg
+- Windows x64 setup: https://github.com/Abhsin/twnty/releases/latest/download/twnty_0.1.0_x64-setup.exe
+
+## Install notes
+
+Builds are currently unsigned, so your operating system will show a warning the first time.
+
+- macOS: right-click the app and choose Open, or go to System Settings, Privacy & Security, and click "Open Anyway".
+- Windows: when SmartScreen appears, click "More info", then "Run anyway".
+
+## Build from source
+
+Requires Node.js 20+ and Rust 1.80+.
+
+    npm install
+    npm run tauri dev       # run in development
+    npm run tauri build     # build platform installers (.dmg on macOS, .msi/.exe on Windows)
+
+## FAQ
+
+Q: Is twnty free? A: Yes, free and open source (MIT).
+Q: What is the 20-20-20 rule? A: Every 20 minutes, look at something 20 feet away for 20 seconds.
+Q: Does it collect data? A: No. No accounts, no telemetry.
+Q: Which platforms? A: macOS (Apple Silicon and Intel) and Windows.

@@ -3,78 +3,183 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>twnty — A tiny desktop companion for the 20-20-20 rule</title>
+    <title>twnty — Free 20-20-20 Eye Break App for Mac &amp; Windows</title>
     <meta
       name="description"
-      content="Every 20 minutes, look at something 20 feet away for 20 seconds. A tiny, open-source macOS &amp; Windows menu-bar companion whose eyes gently remind you to rest."
+      content="Free, open-source 20-20-20 rule app for Mac &amp; Windows. Little eyes in your menu bar tire over 20 minutes, then guide a calm break. No account, no tracking."
     />
+    <meta name="robots" content="index,follow,max-image-preview:large" />
     <link rel="canonical" href="https://twnty.app/" />
+    <!-- Paste verification tokens here when you have them:
+    <meta name="google-site-verification" content="..." />
+    <meta name="msvalidate.01" content="..." />
+    -->
     <meta name="theme-color" content="#f7f6f3" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#151514" media="(prefers-color-scheme: dark)" />
 
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://twnty.app/" />
     <meta property="og:site_name" content="twnty" />
-    <meta property="og:title" content="twnty — A tiny desktop companion for the 20-20-20 rule" />
+    <meta property="og:title" content="twnty — Free 20-20-20 Eye Break App for Mac &amp; Windows" />
     <meta
       property="og:description"
-      content="Friendly eyes in your menu bar that slowly tire over 20 minutes, then guide you through a calm 20-second break."
+      content="Friendly eyes in your menu bar that slowly tire over 20 minutes, then guide you through a calm 20-second break. Free and open source."
+    />
+    <meta property="og:image" content="https://twnty.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="twnty: a pair of friendly cartoon eyes with the text 'Little eyes that remind you to rest yours.'"
     />
 
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="twnty — A tiny desktop companion for the 20-20-20 rule" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="twnty — Free 20-20-20 Eye Break App for Mac &amp; Windows" />
     <meta
       name="twitter:description"
-      content="Every 20 minutes, look 20 feet away for 20 seconds. Free, open-source for macOS &amp; Windows."
+      content="Every 20 minutes, look 20 feet away for 20 seconds. Free, open-source eye break reminder for macOS &amp; Windows."
     />
+    <meta name="twitter:image" content="https://twnty.app/og-image.png" />
 
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="alternate" type="text/plain" title="LLM summary" href="/llms.txt" />
     <link rel="stylesheet" href="./styles.css" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://twnty.app/#app",
+            "name": "twnty",
+            "url": "https://twnty.app/",
+            "description": "A free, open-source desktop app for the 20-20-20 rule. Animated eyes in your menu bar or system tray tire over 20 minutes, then guide a calm 20-second break.",
+            "applicationCategory": "HealthApplication",
+            "applicationSubCategory": "Break reminder",
+            "operatingSystem": "macOS, Windows",
+            "softwareVersion": "0.1.0",
+            "downloadUrl": "https://github.com/Abhsin/twnty/releases/latest",
+            "license": "https://opensource.org/licenses/MIT",
+            "isAccessibleForFree": true,
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "image": "https://twnty.app/og-image.png",
+            "screenshot": "https://twnty.app/og-image.png",
+            "featureList": [
+              "Animated eyes in the menu bar or system tray that tire over 20 minutes",
+              "Calm 20-second break as a floating card or full-screen",
+              "Optional floating eyes that follow your cursor",
+              "Pauses when you step away or lock your screen",
+              "Defers popups during full-screen apps, games and presentations",
+              "Strict mode that hides the Skip button",
+              "Multi-monitor aware",
+              "No account, no analytics, no telemetry"
+            ],
+            "author": {
+              "@type": "Person",
+              "name": "Abhishek Singh",
+              "url": "https://github.com/Abhsin"
+            }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://twnty.app/#website",
+            "url": "https://twnty.app/",
+            "name": "twnty",
+            "description": "Free 20-20-20 eye break app for Mac and Windows."
+          },
+          {
+            "@type": "FAQPage",
+            "@id": "https://twnty.app/#faq",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Does the 20-20-20 rule work?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "The American Optometric Association recommends it as a simple habit for digital eye strain: every 20 minutes, look at something about 20 feet away for 20 seconds. Studies are encouraging but modest, and the exact numbers are not proven thresholds. twnty is a habit tool, not a medical device or a treatment. Read the details in our guide to the 20-20-20 rule."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Is twnty really free?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. twnty is free and open source under the MIT license. There is no account, no subscription and no paid tier."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Is it safe? Why does macOS or Windows warn me when I open it?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "The current builds are not code-signed yet, so macOS Gatekeeper and Windows SmartScreen show a warning for unrecognized apps. On macOS, right-click the app and choose Open, or go to System Settings, Privacy & Security, and click Open Anyway. On Windows, click More info, then Run anyway. The full source is public on GitHub, so you can read it or build it yourself."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Does twnty track me?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "No. There are no accounts, no analytics and no telemetry. Your settings and break stats stay on your computer."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Does twnty work on Linux?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Not yet. twnty currently runs on macOS (Universal, so Apple Silicon and Intel) and Windows."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Will it interrupt fullscreen video or presentations?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "No. When a full-screen app, game or presentation is in front, twnty holds back the break popup and sends a quiet notification instead."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Can I make it stricter?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. Turn on strict mode to hide the Skip button, and choose a full-screen break instead of the floating card."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
-    <header class="site-header">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header" id="site-header">
       <div class="header-inner">
-        <a class="brand" href="#top" aria-label="twnty home">
-          <svg
-            class="brand-mark"
-            width="28"
-            height="18"
-            viewBox="0 0 28 18"
-            fill="none"
-            aria-hidden="true"
-          >
-            <ellipse
-              cx="8.5"
-              cy="9"
-              rx="6"
-              ry="7.5"
-              fill="#ffffff"
-              stroke="currentColor"
-              stroke-width="2"
-            />
-            <ellipse
-              cx="19.5"
-              cy="9"
-              rx="6"
-              ry="7.5"
-              fill="#ffffff"
-              stroke="currentColor"
-              stroke-width="2"
-            />
+        <a class="brand" href="/" aria-label="twnty home">
+          <svg class="brand-mark" width="28" height="18" viewBox="0 0 28 18" fill="none" aria-hidden="true">
+            <ellipse cx="8.5" cy="9" rx="6" ry="7.5" fill="#ffffff" stroke="currentColor" stroke-width="2" />
+            <ellipse cx="19.5" cy="9" rx="6" ry="7.5" fill="#ffffff" stroke="currentColor" stroke-width="2" />
             <circle cx="8.5" cy="9.2" r="2.5" fill="#1c1c1a" />
             <circle cx="19.5" cy="9.2" r="2.5" fill="#1c1c1a" />
           </svg>
           <span>twnty</span>
         </a>
 
-        <nav class="header-actions" aria-label="Primary links">
-          <a
-            class="nav-link"
-            href="https://github.com/Abhsin/twnty"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+        <nav class="header-actions" aria-label="Primary">
+          <a class="nav-link nav-hide-sm" href="/20-20-20-rule">The 20-20-20 rule</a>
+          <a class="nav-link nav-hide-sm" href="#faq">FAQ</a>
+          <a class="nav-link" href="https://github.com/Abhsin/twnty" target="_blank" rel="noopener noreferrer">
             GitHub
           </a>
           <button
@@ -96,65 +201,122 @@
       </div>
     </header>
 
-    <main id="top" class="page">
-      <section class="hero">
+    <main id="main" class="page">
+      <section class="hero" aria-labelledby="hero-title">
         <button
           id="hero-eyes"
           class="hero-eyes"
           type="button"
-          aria-label="Interactive twnty eyes — move cursor to look around, click to blink"
+          aria-label="Interactive twnty eyes. Move your cursor to make them look around, click to blink."
           title="Click to blink"
         ></button>
 
-        <h1>Your eyes need a break every 20 minutes.</h1>
+        <p class="hero-kicker">The free 20-20-20 eye break app for Mac &amp; Windows</p>
+        <h1 id="hero-title">Little eyes that remind you to rest yours.</h1>
         <p class="hero-sub">
-          A tiny, open-source companion in your menu bar that slowly tires with you—then gently
-          reminds you to look 20 feet away for 20 seconds.
+          Cartoon eyes in your menu bar slowly redden and droop as 20 minutes pass. Look 20 feet away
+          for 20 seconds, and they perk back up.
         </p>
 
-        <div class="hero-ctas">
+        <div class="hero-ctas" id="hero-ctas">
           <a
-            id="dl-primary"
             class="btn btn-primary"
-            href="https://github.com/Abhsin/twnty/releases/latest"
-            target="_blank"
-            rel="noopener noreferrer"
+            data-download="mac"
+            href="https://github.com/Abhsin/twnty/releases/latest/download/twnty_0.1.0_universal.dmg"
+            rel="noopener"
           >
-            <span id="dl-primary-icon" class="btn-icon" aria-hidden="true"></span>
-            <span id="dl-primary-label">Download for macOS</span>
+            <span class="btn-icon" data-os-icon="mac" aria-hidden="true"></span>
+            <span>Download for macOS</span>
           </a>
           <a
-            id="dl-secondary"
             class="btn btn-secondary"
-            href="https://github.com/Abhsin/twnty/releases/latest"
-            target="_blank"
-            rel="noopener noreferrer"
+            data-download="win"
+            href="https://github.com/Abhsin/twnty/releases/latest/download/twnty_0.1.0_x64-setup.exe"
+            rel="noopener"
           >
-            <span id="dl-secondary-icon" class="btn-icon" aria-hidden="true"></span>
-            <span id="dl-secondary-label">Download for Windows</span>
+            <span class="btn-icon" data-os-icon="win" aria-hidden="true"></span>
+            <span>Download for Windows</span>
           </a>
         </div>
 
-        <p id="release-meta" class="meta-line">
-          v0.1.0 · macOS Universal &amp; Windows · Free &amp; MIT open source ·
+        <p id="platform-note" class="platform-note" hidden></p>
+
+        <ul class="trust-line" aria-label="Highlights">
+          <li>Free</li>
+          <li>Open source (MIT)</li>
+          <li>A few MB</li>
+          <li>No account</li>
+          <li>No tracking</li>
+        </ul>
+
+        <p class="meta-line">
+          <span id="release-version">v0.1.0</span>, macOS Universal (Apple Silicon &amp; Intel) and
+          64-bit Windows.
           <a
+            id="release-notes"
             class="link"
             href="https://github.com/Abhsin/twnty/releases/latest"
             target="_blank"
             rel="noopener noreferrer"
-          >
-            Release notes
-          </a>
+          >Release notes</a>
         </p>
+
+        <details class="install-note">
+          <summary>First launch on macOS or Windows</summary>
+          <div class="install-body">
+            <p class="install-lead">
+              twnty isn't code-signed yet, so your OS may warn you the first time. It's a one-time
+              step, and the
+              <a class="link" href="https://github.com/Abhsin/twnty" target="_blank" rel="noopener noreferrer">source is public</a>
+              if you'd like to check it first.
+            </p>
+            <div class="install-cols">
+              <div>
+                <h3>macOS</h3>
+                <ol>
+                  <li>Open the .dmg and drag twnty to Applications.</li>
+                  <li>Right-click twnty and choose <strong>Open</strong>, then confirm.</li>
+                  <li>
+                    Or go to System Settings, Privacy &amp; Security, and click
+                    <strong>Open Anyway</strong>.
+                  </li>
+                </ol>
+              </div>
+              <div>
+                <h3>Windows</h3>
+                <ol>
+                  <li>Run the installer.</li>
+                  <li>On the SmartScreen screen, click <strong>More info</strong>.</li>
+                  <li>Click <strong>Run anyway</strong>.</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </details>
       </section>
 
-      <section class="playground" aria-label="Interactive eye fatigue and style demo">
+      <section class="playground" aria-labelledby="playground-title">
+        <div class="section-head">
+          <h2 id="playground-title">Watch your eyes get tired</h2>
+          <p>
+            Drag the slider to fast-forward a work session. This is the real eye component from the
+            app.
+          </p>
+        </div>
+
+        <noscript>
+          <p class="noscript-note">
+            The live demo needs JavaScript. In the app, the eyes slowly redden and droop over 20
+            minutes, then guide a 20-second break with a countdown and a soft chime.
+          </p>
+        </noscript>
+
         <div class="playground-card">
           <div class="menubar-strip">
             <span class="menubar-caption">Live menu-bar &amp; tray preview</span>
             <div class="menubar-pill">
               <div id="tray-eyes" class="tray-eyes" aria-hidden="true"></div>
-              <span id="sim-clock" class="sim-clock">20:00</span>
+              <span id="sim-clock" class="sim-clock" aria-hidden="true">20:00</span>
               <span class="pill-sep" aria-hidden="true"></span>
               <button id="preview-break-btn" class="preview-pill-btn" type="button">
                 Preview 20s break
@@ -164,8 +326,8 @@
 
           <div class="scrubber-block">
             <div class="scrubber-head">
-              <label for="strain-slider" class="scrubber-title">Simulate 20-minute work cycle</label>
-              <span id="strain-readout" class="strain-readout">0 min · Fresh &amp; clear</span>
+              <label for="strain-slider" class="scrubber-title">Simulate a 20-minute work cycle</label>
+              <span id="strain-readout" class="strain-readout" aria-live="polite">0 min · Fresh &amp; clear</span>
             </div>
             <input
               id="strain-slider"
@@ -176,118 +338,210 @@
               value="0"
             />
             <div class="presets" role="group" aria-label="Strain presets">
-              <button class="preset-btn is-active" type="button" data-strain="0">0m Fresh</button>
-              <button class="preset-btn" type="button" data-strain="50">10m Working</button>
-              <button class="preset-btn" type="button" data-strain="85">17m Tired</button>
-              <button class="preset-btn" type="button" data-strain="100">20m Break due</button>
+              <button class="preset-btn is-active" type="button" data-strain="0" aria-pressed="true">0m Fresh</button>
+              <button class="preset-btn" type="button" data-strain="50" aria-pressed="false">10m Working</button>
+              <button class="preset-btn" type="button" data-strain="85" aria-pressed="false">17m Tired</button>
+              <button class="preset-btn" type="button" data-strain="100" aria-pressed="false">20m Break due</button>
             </div>
           </div>
 
           <div class="styles-block">
             <div class="styles-head">
-              <span class="scrubber-title">5 selectable eye styles</span>
-              <span class="styles-hint">Move cursor · click eyes to blink</span>
+              <span id="styles-label" class="scrubber-title">5 eye styles</span>
+              <span class="styles-hint">Move your cursor, click the big eyes to blink</span>
             </div>
-            <div id="style-picker" class="styles" role="radiogroup" aria-label="Eye style"></div>
+            <div id="style-picker" class="styles" role="radiogroup" aria-labelledby="styles-label"></div>
           </div>
         </div>
       </section>
 
-      <section class="rule-section" aria-label="The 20-20-20 rule">
-        <div class="rule-grid">
-          <article class="rule-item">
+      <section class="rule-section" id="how-it-works" aria-labelledby="how-title">
+        <div class="section-head">
+          <h2 id="how-title">The 20-20-20 rule, made hard to ignore</h2>
+          <p>
+            It's a simple habit: every 20 minutes, look at something 20 feet away for 20 seconds.
+            twnty keeps the clock so you don't have to.
+          </p>
+        </div>
+        <ol class="rule-grid">
+          <li class="rule-item">
             <div class="rule-num">20 min</div>
             <h3>Every 20 minutes</h3>
             <p>
-              The eyes sit quietly in your menu bar, reddening and drooping as screen time builds.
+              The eyes sit quietly in your menu bar or tray, reddening and drooping as screen time
+              builds.
             </p>
-          </article>
-          <article class="rule-item">
+          </li>
+          <li class="rule-item">
             <div class="rule-num">20 feet</div>
             <h3>Look 20 feet away</h3>
-            <p>
-              Let your focus soften onto a distant window, tree, or wall across the room.
-            </p>
-          </article>
-          <article class="rule-item">
+            <p>Let your focus soften onto a distant window, tree, or wall across the room.</p>
+          </li>
+          <li class="rule-item">
             <div class="rule-num">20 sec</div>
             <h3>For 20 seconds</h3>
             <p>
-              Breathe through the calm countdown until a soft chime plays and the eyes wake clear.
+              Breathe through the calm countdown until a soft chime plays and the eyes wake up clear.
             </p>
-          </article>
-        </div>
+          </li>
+        </ol>
+        <p class="rule-note">
+          The American Optometric Association recommends the 20-20-20 rule as a simple habit for
+          digital eye strain. The evidence is encouraging but modest, so think of twnty as a nudge
+          toward better screen habits, not a treatment.
+          <a class="link" href="/20-20-20-rule">Read the 20-20-20 rule guide</a>
+        </p>
       </section>
 
-      <section class="features-section" aria-label="Features">
-        <h2 class="section-heading">Thoughtfully built</h2>
+      <section class="features-section" aria-labelledby="features-title">
+        <div class="section-head">
+          <h2 id="features-title">Built to stay out of your way</h2>
+        </div>
         <div class="feature-grid">
           <article class="feature-card">
             <h3>Menu bar &amp; system tray</h3>
             <p>
-              Dynamic high-DPI eye icons with 10 progressive fatigue stages and an optional live
-              countdown on macOS.
+              Crisp eye icons with 10 fatigue stages, plus an optional live countdown on macOS.
             </p>
           </article>
           <article class="feature-card">
             <h3>Optional floating eyes</h3>
             <p>
-              Pin transparent SVG eyes anywhere on your desktop—they blink naturally, track your
-              cursor, and smile after breaks.
+              Pin transparent eyes anywhere on your desktop. They blink, follow your cursor, and smile
+              after breaks.
             </p>
           </article>
           <article class="feature-card">
             <h3>Card or full-screen break</h3>
             <p>
-              Choose a centered floating card or a full-screen breathing field, with strict mode if
-              you want no skip button.
+              Pick a floating card or a full-screen breathing field. Strict mode hides the Skip button.
             </p>
           </article>
           <article class="feature-card">
             <h3>Pauses when you step away</h3>
             <p>
-              Automatic idle and screen-lock detection pauses after 5 minutes away and resets fresh
+              Idle and screen-lock detection pauses the timer after 5 minutes away and starts fresh
               when you return.
             </p>
           </article>
           <article class="feature-card">
             <h3>Respects full-screen apps</h3>
             <p>
-              Defers popup windows during videos, games, or presentations and sends a quiet native
-              notification instead.
+              Videos, games and presentations aren't interrupted. twnty sends a quiet notification
+              instead.
             </p>
           </article>
           <article class="feature-card">
-            <h3>Native Rust, zero bloat</h3>
+            <h3>Small and native</h3>
             <p>
-              Background timer runs in Rust with local-only settings and stats. No accounts, no
-              cloud, no telemetry.
+              Built with Tauri and Rust: a few MB, with a timer that runs in the background without
+              fuss. Multi-monitor aware.
             </p>
           </article>
         </div>
       </section>
 
-      <section class="bottom-cta">
-        <h2>Give your eyes a break.</h2>
+      <section class="privacy" aria-labelledby="privacy-title">
+        <div class="privacy-mark" aria-hidden="true">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3 5 6v5c0 4.4 2.9 8.3 7 9.5 4.1-1.2 7-5.1 7-9.5V6l-7-3Z" />
+            <path d="m9 12 2 2 4-4" />
+          </svg>
+        </div>
+        <div>
+          <h2 id="privacy-title">Private by design</h2>
+          <p>
+            No account, no analytics, no telemetry. Your settings and break stats stay on your
+            computer. Don't take our word for it: the whole app is
+            <a class="link" href="https://github.com/Abhsin/twnty" target="_blank" rel="noopener noreferrer">open source under the MIT license</a>.
+          </p>
+        </div>
+      </section>
+
+      <section class="faq" id="faq" aria-labelledby="faq-title">
+        <div class="section-head">
+          <h2 id="faq-title">Questions, answered</h2>
+        </div>
+        <div class="faq-list">
+          <details>
+            <summary>Does the 20-20-20 rule work?</summary>
+            <p>
+              The American Optometric Association recommends it as a simple habit for digital eye
+              strain: every 20 minutes, look at something about 20 feet away for 20 seconds. Studies
+              are encouraging but modest, and the exact numbers are not proven thresholds. twnty is a
+              habit tool, not a medical device or a treatment. Read the details in our
+              <a class="link" href="/20-20-20-rule">guide to the 20-20-20 rule</a>.
+            </p>
+          </details>
+          <details>
+            <summary>Is twnty really free?</summary>
+            <p>
+              Yes. twnty is free and open source under the MIT license. There is no account, no
+              subscription and no paid tier.
+            </p>
+          </details>
+          <details>
+            <summary>Is it safe? Why does macOS or Windows warn me when I open it?</summary>
+            <p>
+              The current builds are not code-signed yet, so macOS Gatekeeper and Windows SmartScreen
+              show a warning for unrecognized apps. On macOS, right-click the app and choose Open, or
+              go to System Settings, Privacy &amp; Security, and click Open Anyway. On Windows, click
+              More info, then Run anyway. The full source is public on GitHub, so you can read it or
+              build it yourself.
+            </p>
+          </details>
+          <details>
+            <summary>Does twnty track me?</summary>
+            <p>
+              No. There are no accounts, no analytics and no telemetry. Your settings and break stats
+              stay on your computer.
+            </p>
+          </details>
+          <details>
+            <summary>Does twnty work on Linux?</summary>
+            <p>
+              Not yet. twnty currently runs on macOS (Universal, so Apple Silicon and Intel) and
+              Windows.
+            </p>
+          </details>
+          <details>
+            <summary>Will it interrupt fullscreen video or presentations?</summary>
+            <p>
+              No. When a full-screen app, game or presentation is in front, twnty holds back the
+              break popup and sends a quiet notification instead.
+            </p>
+          </details>
+          <details>
+            <summary>Can I make it stricter?</summary>
+            <p>
+              Yes. Turn on strict mode to hide the Skip button, and choose a full-screen break
+              instead of the floating card.
+            </p>
+          </details>
+        </div>
+      </section>
+
+      <section class="bottom-cta" aria-labelledby="cta-title">
+        <h2 id="cta-title">Give your eyes a break.</h2>
         <p class="bottom-sub">Free, open source, and ready for macOS and Windows.</p>
         <div class="hero-ctas">
           <a
-            id="dl-bottom-mac"
             class="btn btn-primary"
-            href="https://github.com/Abhsin/twnty/releases/latest"
-            target="_blank"
-            rel="noopener noreferrer"
+            data-download="mac"
+            href="https://github.com/Abhsin/twnty/releases/latest/download/twnty_0.1.0_universal.dmg"
+            rel="noopener"
           >
-            Download for macOS
+            <span class="btn-icon" data-os-icon="mac" aria-hidden="true"></span>
+            <span>Download for macOS</span>
           </a>
           <a
-            id="dl-bottom-win"
             class="btn btn-secondary"
-            href="https://github.com/Abhsin/twnty/releases/latest"
-            target="_blank"
-            rel="noopener noreferrer"
+            data-download="win"
+            href="https://github.com/Abhsin/twnty/releases/latest/download/twnty_0.1.0_x64-setup.exe"
+            rel="noopener"
           >
-            Download for Windows
+            <span class="btn-icon" data-os-icon="win" aria-hidden="true"></span>
+            <span>Download for Windows</span>
           </a>
           <a
             class="btn btn-ghost"
@@ -301,35 +555,20 @@
       </section>
     </main>
 
-    <footer class="site-footer">
-      <span>twnty.app</span>
-      <span aria-hidden="true">·</span>
-      <a
-        class="link"
-        href="https://github.com/Abhsin/twnty/blob/main/LICENSE"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        MIT License
-      </a>
-      <span aria-hidden="true">·</span>
-      <a
-        class="link"
-        href="https://github.com/Abhsin/twnty"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        GitHub
-      </a>
-      <span aria-hidden="true">·</span>
-      <a
-        class="link"
-        href="https://github.com/Abhsin/twnty/releases/latest"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Releases
-      </a>
+    <footer class="site-footer" id="site-footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <strong>twnty</strong>
+          <span>A free, open-source 20-20-20 eye break app for Mac and Windows.</span>
+        </div>
+        <nav class="footer-links" aria-label="Footer">
+          <a class="link" href="/20-20-20-rule">The 20-20-20 rule</a>
+          <a class="link" href="https://github.com/Abhsin/twnty" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a class="link" href="https://github.com/Abhsin/twnty/releases/latest" target="_blank" rel="noopener noreferrer">Releases</a>
+          <a class="link" href="https://github.com/Abhsin/twnty/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>
+          <a class="link" href="/llms.txt">llms.txt</a>
+        </nav>
+      </div>
     </footer>
 
     <div
@@ -338,11 +577,12 @@
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
+      aria-describedby="modal-hint"
     >
       <div class="break-modal-toolbar">
         <div class="seg" role="group" aria-label="Break preview style">
-          <button id="modal-mode-card" class="is-active" type="button">Card</button>
-          <button id="modal-mode-overlay" type="button">Full screen</button>
+          <button id="modal-mode-card" class="is-active" type="button" aria-pressed="true">Card</button>
+          <button id="modal-mode-overlay" type="button" aria-pressed="false">Full screen</button>
         </div>
 
         <div class="toolbar-right">
@@ -363,7 +603,7 @@
         <div class="modal-bar"><div id="modal-bar-fill" class="modal-bar-fill"></div></div>
         <div class="modal-actions">
           <button id="modal-plus" type="button">+10 s</button>
-          <span id="modal-sep" class="modal-sep" aria-hidden="true">·</span>
+          <span id="modal-sep" class="modal-sep" aria-hidden="true"></span>
           <button id="modal-skip" type="button">Finish preview</button>
         </div>
       </div>

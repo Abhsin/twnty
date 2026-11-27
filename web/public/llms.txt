@@ -1,0 +1,52 @@
+# twnty
+
+> twnty is a free, open-source (MIT) desktop app for macOS and Windows that reminds you to follow the 20-20-20 rule: every 20 minutes, look at something 20 feet away for 20 seconds. A pair of friendly eyes lives in your menu bar or system tray and slowly turns bloodshot red as 20 minutes pass; when time is up, a gentle break reminder appears with a 20-second countdown. No accounts, no telemetry, everything stays on your computer.
+
+twnty is for anyone who works at a screen for long stretches (developers, designers, writers, students) and wants a low-friction way to build the habit of resting their eyes. It costs nothing. It runs on macOS (Apple Silicon and Intel, universal build) and Windows (x64).
+
+## Download
+
+- [Latest release (all installers)](https://github.com/Abhsin/twnty/releases/latest): GitHub Releases page
+- [macOS universal .dmg](https://github.com/Abhsin/twnty/releases/latest/download/twnty_0.1.0_universal.dmg): Apple Silicon and Intel
+- [Windows x64 setup .exe](https://github.com/Abhsin/twnty/releases/latest/download/twnty_0.1.0_x64-setup.exe): Windows installer
+
+## Learn more
+
+- [Website](https://twnty.app/): product overview with an interactive eye demo and break-screen preview
+- [The 20-20-20 rule explained](https://twnty.app/20-20-20-rule): guide to the rule for digital eye strain
+- [Source code](https://github.com/Abhsin/twnty): MIT-licensed repository, README, and issues
+
+## Features
+
+- Five selectable eye styles: Classic, Googly, Cat, Sparkle, Dot
+- macOS menu bar icon and Windows system tray icon with 10 progressive redness stages, plus an optional live countdown on macOS
+- Optional floating desktop companion: transparent, always-on-top, draggable eyes that blink, follow the cursor, and smile after a break
+- Break reminder as a centered card or a full-screen calm color field, with a 20-second countdown and a soft singing-bowl chime
+- Pauses after 5 minutes without input; defers popups during full-screen apps; opens on the monitor your cursor is on; optional strict mode hides Skip
+- Daily stats (breaks taken vs. skipped) and configurable work/rest intervals
+
+## Privacy
+
+- No accounts, no telemetry, no analytics in the app
+- All settings and stats are stored locally on your device
+
+## FAQ
+
+### Is twnty free?
+Yes. It is free and open source under the MIT license.
+
+### Which platforms does it support?
+macOS (universal: Apple Silicon and Intel) and Windows.
+
+### What is the 20-20-20 rule?
+Every 20 minutes, look at something 20 feet (about 6 meters) away for 20 seconds, to give your eyes a rest from close-up screen focus.
+
+### Does twnty collect my data?
+No. There are no accounts and no telemetry; everything stays local.
+
+### Why does my OS warn me when installing?
+Current builds are unsigned. On macOS, right-click the app and choose Open (or use System Settings, Privacy & Security, Open Anyway). On Windows SmartScreen, choose More info, then Run anyway.
+
+## Optional
+
+- [Full plain-text description](https://twnty.app/llms-full.txt)
