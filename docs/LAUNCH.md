@@ -10,8 +10,14 @@ version mismatch (`tauri` crate 2.10.3 vs `@tauri-apps/api` 2.12.4). This branch
 `@tauri-apps/api` and `@tauri-apps/cli` to 2.10.1.
 
 1. Merge this branch to `main`.
-2. Re-run the release: Actions → "Build & Release (macOS + Windows)" → **Run workflow**
-   on `main` (it reuses the existing `v0.1.0` draft), or delete the draft + tag and push a new tag.
+2. The old `v0.1.0` tag points at a commit **without** the fix, so re-tag at the merge commit:
+   ```bash
+   gh release delete v0.1.0 --yes --cleanup-tag   # removes the empty draft + old tag
+   git checkout main && git pull
+   git tag v0.1.0 && git push origin v0.1.0        # triggers "Build & Release"
+   ```
+   **Heads-up: a successful run publishes the release publicly**: its last job runs
+   `gh release edit --draft=false`.
 3. Confirm the release is published and has `twnty_0.1.0_universal.dmg` and
    `twnty_0.1.0_x64-setup.exe`. The site links straight to
    `/releases/latest/download/<those names>`, so **asset names must stay the same**; when you
@@ -37,7 +43,9 @@ warnings. The site explains the workaround, but many people still bail.
    `google-site-verification` meta in `web/index.html`.
 2. Sitemaps → submit `https://twnty.app/sitemap.xml`.
 3. URL Inspection → `https://twnty.app/` and `/20-20-20-rule` → **Request indexing**.
-4. Check Enhancements after a few days: FAQ, Software App, Breadcrumbs should parse without errors.
+4. After a few days, check Enhancements for structured-data errors. Don't expect FAQ or star-rating
+   snippets in results: Google limits FAQ rich results to authoritative gov/health sites, and app
+   snippets need real ratings. The schema still helps Google and AI assistants understand the pages.
 
 **Bing Webmaster Tools** — https://www.bing.com/webmasters (also feeds ChatGPT search, DuckDuckGo,
 Copilot): "Import from Google Search Console" is one click. Submit the sitemap.
@@ -86,8 +94,6 @@ Reddit/HN/AlternativeTo — so sections 2 and 5 are what actually gets twnty rec
 Each targets a long-tail query from the research; add each to `sitemap.xml` and
 `vite.web.config.ts` inputs.
 
-1. `/lookaway-alternative` — "Free LookAway alternative for Mac & Windows" (fair comparison).
-2. `/eye-break-app-windows` — Windows is underserved in search results.
-3. `/timer` — a browser 20-20-20 timer (earns links; funnels to download).
-4. `/stretchly-alternative`, `/time-out-alternative`.
-5. Changelog page per release (fresh content + release keywords).
+1. `/eye-break-app-windows` — Windows is underserved in search results.
+2. `/timer` — a browser 20-20-20 timer (earns links; funnels to download).
+3. Changelog page per release (fresh content + release keywords).

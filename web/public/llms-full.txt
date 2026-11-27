@@ -50,7 +50,7 @@ No accounts and no telemetry. Settings and stats are stored locally on your devi
 
 Builds are currently unsigned, so your operating system will show a warning the first time.
 
-- macOS: right-click the app and choose Open, or go to System Settings, Privacy & Security, and click "Open Anyway".
+- macOS: open the app once and dismiss the warning, then go to System Settings, Privacy & Security, scroll down and click "Open Anyway". (On macOS 15 and later, right-click → Open no longer bypasses this.)
 - Windows: when SmartScreen appears, click "More info", then "Run anyway".
 
 ## Build from source
