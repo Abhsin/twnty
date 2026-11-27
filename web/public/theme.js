@@ -1,0 +1,1 @@
+try{var t=localStorage.getItem("twnty-web-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");var m=document.querySelector("meta[name=theme-color]");if(m)m.setAttribute("content","#f7f6f3")}}catch(e){}

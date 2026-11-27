@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Privacy Policy | twnty</title>
     <meta
       name="description"
-      content="twnty privacy policy: the app has no accounts, no telemetry and no network calls; this website uses cookieless page-view analytics. Plain and short."
+      content="twnty privacy policy: the app has no accounts, no telemetry, and no network calls; this website uses cookieless page-view analytics. Plain and short."
     />
     <link rel="canonical" href="https://twnty.app/privacy" />
     <meta name="robots" content="index,follow,max-image-preview:large" />
-    <meta name="theme-color" content="#f7f6f3" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#151514" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#111110" />
+    <script src="/theme.js"></script>
 
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://twnty.app/privacy" />
@@ -35,6 +35,7 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="stylesheet" href="./theme.css" />
     <link rel="stylesheet" href="./guide.css" />
     <link rel="stylesheet" href="./chrome.css" />
 
@@ -146,7 +147,7 @@
         <h2 id="app">The twnty app</h2>
         <ul>
           <li>No account, no sign-in.</li>
-          <li>No analytics, no telemetry and no crash reporting.</li>
+          <li>No analytics, no telemetry, and no crash reporting.</li>
           <li>
             The app makes no network connections of its own. It has no update checker and no
             code that talks to a server. You can confirm this in the
@@ -154,8 +155,8 @@
           </li>
           <li>
             Your settings (such as break intervals and eye style) and daily break stats (breaks
-            taken and skipped) are saved as small files in the app's configuration folder on your
-            own computer. They never leave it, and removing the app and that folder removes them.
+            taken and skipped) are saved as small files in the app's local config folder on your
+            computer. They never leave it, and removing the app and that folder removes them.
           </li>
         </ul>
         <p>
@@ -184,11 +185,11 @@
           </li>
           <li>
             <strong>Theme choice.</strong> If you switch between light and dark, that choice is
-            stored in your browser's localStorage on your device. It isn't sent to us.
+            saved in your browser's local storage on your device. It isn't sent to us.
           </li>
           <li>
             <strong>No cookies, no ads, no forms.</strong> The site has no accounts, newsletter
-            sign-up or advertising.
+            sign-up, or advertising.
           </li>
         </ul>
 

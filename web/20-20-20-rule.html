@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,8 +11,8 @@
     <link rel="canonical" href="https://twnty.app/20-20-20-rule" />
     <meta name="robots" content="index,follow,max-image-preview:large" />
     <meta name="author" content="Abhishek Singh" />
-    <meta name="theme-color" content="#f7f6f3" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#151514" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#111110" />
+    <script src="/theme.js"></script>
 
     <meta property="og:type" content="article" />
     <meta property="og:url" content="https://twnty.app/20-20-20-rule" />
@@ -40,6 +40,7 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="stylesheet" href="./theme.css" />
     <link rel="stylesheet" href="./guide.css" />
     <link rel="stylesheet" href="./chrome.css" />
 
@@ -107,7 +108,7 @@
                 "name": "Do I have to look exactly 20 feet away?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No. About 20 feet (roughly 6 metres) just means something distant, like a window or the far side of a room. Published commentary questions whether these exact numbers are justified, so treat them as a practical guideline."
+                  "text": "No. About 20 feet (roughly 6 meters) just means something distant, like a window or the far side of a room. Published commentary questions whether these exact numbers are justified, so treat them as a practical guideline."
                 }
               },
               {
@@ -222,7 +223,7 @@
             at something about 20 feet away for 20 seconds. The American Optometric Association
             recommends it for digital eye strain, and a 2023 randomized study found it helped with
             symptoms. But the evidence is modest, and the exact numbers aren't proven thresholds. It's
-            a cheap habit worth trying, not a cure.
+            a low-effort habit worth trying, not a cure.
           </p>
         </header>
 
@@ -245,7 +246,7 @@
           <h2 id="what-is-it">What is the 20-20-20 rule?</h2>
           <p>
             The 20-20-20 rule is a simple break routine for people who spend long stretches on
-            computers, phones or tablets. It has three parts:
+            computers, phones, or tablets. It has three parts:
           </p>
           <div class="rule-grid">
             <div class="rule-item">
@@ -254,7 +255,7 @@
             </div>
             <div class="rule-item">
               <div class="rule-num">20 feet</div>
-              <p>Look at something about 20 feet (6 metres) away, such as a window or far wall.</p>
+              <p>Look at something about 20 feet (6 meters) away, such as a window or far wall.</p>
             </div>
             <div class="rule-item">
               <div class="rule-num">20 seconds</div>
@@ -306,7 +307,7 @@
             </li>
           </ul>
           <p>
-            Other factors, such as glare, screen position and an uncorrected prescription, can also
+            Other factors, such as glare, screen position, and an uncorrected prescription, can also
             play a part, which is why one habit rarely solves everything.
           </p>
 
@@ -351,9 +352,9 @@
           </ul>
           <p>
             Put together: regular short breaks from near work look helpful for symptoms, and the rule is
-            an easy way to remember to take them. There is no evidence here that 20 minutes, 20 feet or
+            an easy way to remember to take them. There is no evidence here that 20 minutes, 20 feet, or
             20 seconds are magic numbers. If your eyes need a break after 15 minutes, take one. Nothing
-            on this page suggests the rule treats or prevents any eye condition.
+            on this page suggests the rule treats, diagnoses, or prevents any eye condition.
           </p>
         </div>
 
@@ -369,7 +370,7 @@
           </button>
           <p id="try-status" class="sr-only" role="status"></p>
           <div id="try-done" class="try-done" hidden>
-            <p>Want these reminders to just happen while you work?</p>
+            <p>Want automatic reminders while you work?</p>
             <div class="btn-row">
               <a
                 class="btn btn-primary"
@@ -403,17 +404,17 @@
               when a build runs, or when you sip water.
             </li>
             <li>
+              <strong>Pick a far target in advance.</strong> A window or a poster across the room means
+              you don't have to think about where to look.
+            </li>
+            <li>
               <strong>Make the break obvious but not annoying.</strong> Many people find a visible cue
               they can glance at easier to act on than a notification they swipe away. It builds
               gently, so you notice it before it becomes a nag.
             </li>
-            <li>
-              <strong>Pick a far target in advance.</strong> A window or a poster across the room means
-              you don't have to think about where to look.
-            </li>
           </ul>
           <p>
-            That last idea is why we built <a href="/">twnty</a>: a small companion in your menu bar
+            That's why we built <a href="/">twnty</a>: a small companion in your menu bar
             (macOS) or system tray (Windows) with a pair of cartoon eyes that slowly look more tired as
             20 minutes pass, then guide you through a calm 20-second break. It pauses when you step away
             or lock your screen, holds back during full-screen apps, and keeps everything local, with no
@@ -423,7 +424,7 @@
 
           <div class="cta-box">
             <h3>Get automatic 20-20-20 reminders</h3>
-            <p>Free, open source, a few megabytes. Works on macOS and Windows.</p>
+            <p>Free, open source, and lightweight. Available for macOS and Windows.</p>
             <div class="btn-row">
               <a
                 class="btn btn-primary"
@@ -437,7 +438,7 @@
                 href="https://github.com/Abhsin/twnty/releases/latest/download/twnty_0.1.0_x64-setup.exe"
                 >Download for Windows</a
               >
-              <a class="btn btn-secondary" href="/">See twnty</a>
+              <a class="btn btn-secondary" href="/">Try the live demo</a>
             </div>
           </div>
 
@@ -522,7 +523,7 @@
           <details>
             <summary>Do I have to look exactly 20 feet away?</summary>
             <p>
-              No. About 20 feet (roughly 6 metres) just means something distant, like a window or the
+              No. About 20 feet (roughly 6 meters) just means something distant, like a window or the
               far side of a room. Published commentary questions whether these exact numbers are
               justified, so treat them as a practical guideline.
             </p>

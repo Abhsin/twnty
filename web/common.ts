@@ -3,27 +3,27 @@
 import { trackDownload } from "./analytics";
 
 const THEME_KEY = "twnty-web-theme";
+const THEME_COLORS = { dark: "#111110", light: "#f7f6f3" } as const;
 const root = document.documentElement;
 
-// ---------------------------------------------------------------------------
-// Theme
-// ---------------------------------------------------------------------------
+// Dark is the default for everyone (data-theme="dark" is set in the HTML). A saved
+// "light" choice wins; /theme.js applies it before first paint, this keeps it in sync.
+type Theme = "light" | "dark";
+
+function applyTheme(theme: Theme): void {
+  root.setAttribute("data-theme", theme);
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", THEME_COLORS[theme]);
+}
+
 try {
-  const stored = localStorage.getItem(THEME_KEY);
-  if (stored === "light" || stored === "dark") root.setAttribute("data-theme", stored);
+  if (localStorage.getItem(THEME_KEY) === "light") applyTheme("light");
 } catch {
   // Storage unavailable
 }
 
-function currentTheme(): "light" | "dark" {
-  const attr = root.getAttribute("data-theme");
-  if (attr === "light" || attr === "dark") return attr;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-}
-
 document.getElementById("theme-toggle")?.addEventListener("click", () => {
-  const next = currentTheme() === "dark" ? "light" : "dark";
-  root.setAttribute("data-theme", next);
+  const next: Theme = root.getAttribute("data-theme") === "light" ? "dark" : "light";
+  applyTheme(next);
   try {
     localStorage.setItem(THEME_KEY, next);
   } catch {

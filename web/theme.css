@@ -1,0 +1,294 @@
+/* Shared design tokens + base chrome for every page (dark first, light opt-in).
+   Dark is the default for everyone: <html data-theme="dark"> is set statically
+   and /theme.js swaps in a saved "light" choice before first paint. */
+
+:root {
+  /* Deep warm night */
+  --bg: #111110;
+  --surface: #1a1918;
+  --surface-2: #222120;
+  --ink: #f3eee5;
+  --ink-2: #bdb5a8;
+  --ink-3: #9a9183;
+  --prose: #ddd6ca;
+  --line: rgba(255, 244, 228, 0.09);
+  --line-2: rgba(255, 244, 228, 0.17);
+  --hover: rgba(255, 244, 228, 0.07);
+  --glass: rgba(255, 244, 228, 0.07);
+  --glass-hover: rgba(255, 244, 228, 0.12);
+  --track: #3a362f;
+  --red: #ff7b7f;
+  --btn-bg: #f6f1e8;
+  --btn-fg: #14110d;
+
+  --amber: #f0a35e;
+  --teal: #5fa8c7;
+
+  --font: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text",
+    "Segoe UI", system-ui, sans-serif;
+  --font-display: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display",
+    "Segoe UI", system-ui, sans-serif;
+
+  font-family: var(--font);
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --bg: #f7f6f3;
+  --surface: #ffffff;
+  --surface-2: #efeeea;
+  --ink: #1b1814;
+  --ink-2: #524c44;
+  --ink-3: #6a6358;
+  --prose: #2b2722;
+  --line: rgba(27, 24, 20, 0.1);
+  --line-2: rgba(27, 24, 20, 0.2);
+  --hover: rgba(27, 24, 20, 0.05);
+  --glass: rgba(27, 24, 20, 0.05);
+  --glass-hover: rgba(27, 24, 20, 0.09);
+  --track: #d9d3c6;
+  --red: #c42b31;
+  --btn-bg: #1b1814;
+  --btn-fg: #f7f6f3;
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--bg);
+}
+
+body {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.5;
+  overflow-x: clip;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.hidden,
+[hidden] {
+  display: none !important;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 200;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  font-size: 15px;
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: none;
+}
+
+/* ---------- Header ---------- */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+
+.header-inner {
+  max-width: var(--chrome-w, 1160px);
+  margin: 0 auto;
+  height: 60px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-link {
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 15px;
+  color: var(--ink-2);
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.nav-link:hover {
+  background: var(--hover);
+  color: var(--ink);
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-2);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.icon-btn:hover {
+  background: var(--hover);
+  color: var(--ink);
+}
+
+.icon-sun {
+  display: none;
+}
+
+:root[data-theme="dark"] .icon-sun {
+  display: block;
+}
+
+:root[data-theme="dark"] .icon-moon {
+  display: none;
+}
+
+/* ---------- Buttons ---------- */
+
+.btn {
+  height: 48px;
+  padding: 0 24px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 550;
+  letter-spacing: -0.005em;
+  transition:
+    background 0.15s ease,
+    opacity 0.15s ease,
+    transform 0.12s ease,
+    box-shadow 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+}
+
+.btn-primary:disabled {
+  opacity: 0.55;
+  cursor: default;
+  transform: none;
+}
+
+.btn-secondary,
+.btn-ghost {
+  background: var(--glass);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+}
+
+.btn-secondary:hover,
+.btn-ghost:hover {
+  background: var(--glass-hover);
+}
+
+.btn-ghost {
+  color: var(--ink-2);
+}
+
+.btn-ghost:hover {
+  color: var(--ink);
+}
+
+.link {
+  color: var(--ink-2);
+  text-decoration: underline;
+  text-decoration-color: var(--line-2);
+  text-underline-offset: 3px;
+}
+
+.link:hover {
+  color: var(--ink);
+  text-decoration-color: currentColor;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

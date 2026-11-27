@@ -9,13 +9,34 @@ const WINDOWS_ICON = `<svg width="14" height="14" viewBox="0 0 24 24" fill="curr
 const byId = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
 
 // ---------------------------------------------------------------------------
-// Live eyes: Hero, Menu-bar preview, Style picker
+// Platform + motion preference (used by the mockup and the download buttons)
+// ---------------------------------------------------------------------------
+type Platform = "mac" | "win" | "linux" | "mobile" | "other";
+
+function detectPlatform(): Platform {
+  const ua = navigator.userAgent.toLowerCase();
+  const nav = navigator as Navigator & { userAgentData?: { mobile?: boolean; platform?: string } };
+  const uaPlatform = (nav.userAgentData?.platform ?? navigator.platform ?? "").toLowerCase();
+  const touchMac = uaPlatform.includes("mac") && navigator.maxTouchPoints > 1; // iPadOS
+  if (nav.userAgentData?.mobile || /android|iphone|ipad|ipod|mobile/.test(ua) || touchMac) {
+    return "mobile";
+  }
+  if (ua.includes("windows") || uaPlatform.includes("win")) return "win";
+  if (ua.includes("mac") || uaPlatform.includes("mac")) return "mac";
+  if (ua.includes("linux") || ua.includes("x11") || uaPlatform.includes("linux")) return "linux";
+  return "other";
+}
+
+const platform = detectPlatform();
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// ---------------------------------------------------------------------------
+// Live eyes: hero, tray, floating desktop eyes, style picker
 // ---------------------------------------------------------------------------
 let currentStyle: EyeStyle = "classic";
 let currentProgress = 0;
 
 const heroEyesBtn = byId<HTMLButtonElement>("hero-eyes");
-const trayEyesEl = byId("tray-eyes");
 const stylePickerEl = byId("style-picker");
 
 const heroEyes = new EyesComponent(heroEyesBtn, {
@@ -26,7 +47,7 @@ const heroEyes = new EyesComponent(heroEyesBtn, {
   trackCursor: true,
 });
 
-const trayEyes = new EyesComponent(trayEyesEl, {
+const trayEyes = new EyesComponent(byId("tray-eyes"), {
   style: currentStyle,
   progress: 0,
   mood: "working",
@@ -34,9 +55,18 @@ const trayEyes = new EyesComponent(trayEyesEl, {
   trackCursor: false,
 });
 
+const floatEyes = new EyesComponent(byId("float-eyes"), {
+  style: currentStyle,
+  progress: 0,
+  mood: "working",
+  autoBlink: true,
+  trackCursor: true,
+});
+
 heroEyesBtn.addEventListener("click", () => heroEyes.blink());
 
 const styleTiles = new Map<EyeStyle, { button: HTMLButtonElement; eyes: EyesComponent }>();
+let breakEyes: EyesComponent | null = null;
 
 for (const s of EYE_STYLES) {
   const tile = document.createElement("button");
@@ -63,7 +93,10 @@ for (const s of EYE_STYLES) {
     trackCursor: false,
   });
 
-  tile.addEventListener("click", () => selectEyeStyle(s.id));
+  tile.addEventListener("click", () => {
+    markUserInteracted();
+    selectEyeStyle(s.id);
+  });
   tile.addEventListener("keydown", (e) => {
     const keys = ["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp", "Home", "End"];
     if (!keys.includes(e.key)) return;
@@ -85,7 +118,8 @@ function selectEyeStyle(next: EyeStyle): void {
   currentStyle = next;
   heroEyes.setStyle(next);
   trayEyes.setStyle(next);
-  modalEyes?.setStyle(next);
+  floatEyes.setStyle(next);
+  breakEyes?.setStyle(next);
 
   for (const [id, item] of styleTiles) {
     const active = id === next;
@@ -96,51 +130,79 @@ function selectEyeStyle(next: EyeStyle): void {
 }
 
 // ---------------------------------------------------------------------------
-// Strain timeline scrubber + simulated clock
+// Desktop mockup: macOS menu bar or Windows taskbar
+// ---------------------------------------------------------------------------
+const desk = byId("desk");
+const tray = byId("tray");
+const traySlots = { mac: byId("slot-mac"), win: byId("slot-win") };
+const osButtons = Array.from(document.querySelectorAll<HTMLButtonElement>("button[data-os]"));
+
+function setDeskOS(os: "mac" | "win"): void {
+  desk.dataset.os = os;
+  traySlots[os].append(tray);
+  for (const btn of osButtons) {
+    const on = btn.dataset.os === os;
+    btn.classList.toggle("is-active", on);
+    btn.setAttribute("aria-pressed", String(on));
+  }
+}
+
+let userInteracted = false;
+let autoPreviewRan = false;
+
+function markUserInteracted(): void {
+  userInteracted = true;
+}
+
+for (const btn of osButtons) {
+  btn.addEventListener("click", () => {
+    markUserInteracted();
+    setDeskOS(btn.dataset.os === "win" ? "win" : "mac");
+  });
+}
+setDeskOS(platform === "win" ? "win" : "mac");
+
+// ---------------------------------------------------------------------------
+// Strain scrubber + simulated clock
 // ---------------------------------------------------------------------------
 const strainSlider = byId<HTMLInputElement>("strain-slider");
 const strainReadout = byId("strain-readout");
 const simClock = byId("sim-clock");
 const presetButtons = Array.from(document.querySelectorAll<HTMLButtonElement>(".preset-btn"));
+let shownPct = -1;
 
 function describeStrain(pct: number): { label: string; due: boolean } {
-  if (pct >= 98) return { label: "20 min · Break due", due: true };
-  if (pct >= 75) {
-    const mins = Math.round((pct / 100) * 20);
-    return { label: `${mins} min · Tired & reddening`, due: false };
-  }
-  if (pct >= 35) {
-    const mins = Math.round((pct / 100) * 20);
-    return { label: `${mins} min · Screen fatigue building`, due: false };
-  }
-  if (pct > 0) {
-    const mins = Math.round((pct / 100) * 20);
-    return { label: `${mins} min · Focused`, due: false };
-  }
+  if (pct >= 98) return { label: "20 min · Time for a break", due: true };
+  const mins = Math.round((pct / 100) * 20);
+  if (pct >= 75) return { label: `${mins} min · Tired & red`, due: false };
+  if (pct >= 35) return { label: `${mins} min · Fatigue building`, due: false };
+  if (pct > 0) return { label: `${mins} min · Focused`, due: false };
   return { label: "0 min · Fresh & clear", due: false };
 }
 
-function setStrainPercent(pctRaw: number): void {
-  const pct = Math.max(0, Math.min(100, Math.round(pctRaw)));
-  currentProgress = pct / 100;
-  strainSlider.value = String(pct);
+/** Drive every eye, the countdown and the controls from one 0..1 progress value. */
+function applyProgress(raw: number): void {
+  const p = Math.max(0, Math.min(1, raw));
+  currentProgress = p;
+  const pct = Math.round(p * 100);
 
-  heroEyes.setProgress(currentProgress);
-  trayEyes.setProgress(currentProgress);
-  for (const [, item] of styleTiles) {
-    item.eyes.setProgress(currentProgress * 0.45);
-  }
+  heroEyes.setProgress(p);
+  trayEyes.setProgress(p);
+  floatEyes.setProgress(p);
+  for (const [, item] of styleTiles) item.eyes.setProgress(p * 0.45);
 
-  const remainingSecs = Math.max(0, Math.round((1 - currentProgress) * 20 * 60));
+  const remainingSecs = Math.max(0, Math.round((1 - p) * 20 * 60));
   const mm = String(Math.floor(remainingSecs / 60)).padStart(2, "0");
   const ss = String(remainingSecs % 60).padStart(2, "0");
   simClock.textContent = `${mm}:${ss}`;
 
+  if (pct === shownPct) return;
+  shownPct = pct;
+  strainSlider.value = String(pct);
   const desc = describeStrain(pct);
   strainReadout.textContent = desc.label;
   strainSlider.setAttribute("aria-valuetext", desc.label);
   strainReadout.classList.toggle("is-due", desc.due);
-
   for (const btn of presetButtons) {
     const target = Number(btn.dataset.strain ?? "-1");
     btn.classList.toggle("is-active", target === pct);
@@ -149,34 +211,41 @@ function setStrainPercent(pctRaw: number): void {
 }
 
 strainSlider.addEventListener("input", () => {
-  setStrainPercent(Number(strainSlider.value));
+  markUserInteracted();
+  cancelActivity();
+  applyProgress(Number(strainSlider.value) / 100);
 });
 
 for (const btn of presetButtons) {
   btn.addEventListener("click", () => {
-    setStrainPercent(Number(btn.dataset.strain ?? "0"));
+    markUserInteracted();
+    cancelActivity();
+    applyProgress(Number(btn.dataset.strain ?? "0") / 100);
   });
 }
 
-setStrainPercent(0);
+applyProgress(0);
 
 // ---------------------------------------------------------------------------
-// Interactive Break Preview Modal
+// In-screen break + "play 20 minutes" sequence (one clock, paused offscreen)
 // ---------------------------------------------------------------------------
-const breakModal = byId("break-modal");
-const previewBreakBtn = byId<HTMLButtonElement>("preview-break-btn");
-const modalEyesEl = byId("modal-eyes");
-const modalTitle = byId("modal-title");
-const modalHint = byId("modal-hint");
-const modalSecs = byId("modal-secs");
-const modalBarFill = byId("modal-bar-fill");
-const modalPlus = byId<HTMLButtonElement>("modal-plus");
-const modalSkip = byId<HTMLButtonElement>("modal-skip");
-const modalCloseX = byId<HTMLButtonElement>("modal-close-x");
-const modalSoundToggle = byId<HTMLButtonElement>("modal-sound-toggle");
-const modalModeCard = byId<HTMLButtonElement>("modal-mode-card");
-const modalModeOverlay = byId<HTMLButtonElement>("modal-mode-overlay");
+const breakLayer = byId("break-layer");
+const breakTitle = byId("break-title");
+const breakHint = byId("break-hint");
+const breakSecs = byId("break-secs");
+const breakBarFill = byId("break-bar-fill");
+const breakStatus = byId("break-status");
+const breakPlus = byId<HTMLButtonElement>("break-plus");
+const breakSkip = byId<HTMLButtonElement>("break-skip");
+const playBtn = byId<HTMLButtonElement>("play-btn");
+const previewBtn = byId<HTMLButtonElement>("preview-break-btn");
+const modeCard = byId<HTMLButtonElement>("mode-card");
+const modeOverlay = byId<HTMLButtonElement>("mode-overlay");
+const soundToggle = byId<HTMLButtonElement>("sound-toggle");
 
+const PLAY_MS = 10_000;
+const HINT_MS = 4500;
+const PLAY_LABEL = "Play 20 min in 10s";
 const BREAK_HINTS = [
   "About 20 feet. Let your eyes go soft.",
   "Breathe in...",
@@ -184,208 +253,275 @@ const BREAK_HINTS = [
   "Unclench your jaw. Drop your shoulders.",
 ];
 
-let modalEyes: EyesComponent | null = null;
-let breakTotalSecs = 20;
-let breakRemainingSecs = 20;
-let breakInterval: number | null = null;
-let hintTimer: number | null = null;
+const AUTO_MS = 3600;
+const AUTO_TARGET = 0.85;
+
+type Phase = "idle" | "auto" | "playing" | "break" | "done";
+let phase: Phase = "idle";
+let playElapsed = 0;
+let breakTotal = 20_000;
+let breakElapsed = 0;
+let shownSecs = -1;
 let hintIndex = 0;
 let soundEnabled = true;
+let onScreen = true;
+let rafId = 0;
+let lastT = 0;
+let lastApply = 0;
+let finishTimer: number | undefined;
+let lastFocused: HTMLElement | null = null;
 
 function setBreakStyle(mode: "card" | "overlay"): void {
   const overlay = mode === "overlay";
-  breakModal.classList.toggle("mode-overlay", overlay);
-  breakModal.classList.toggle("mode-card", !overlay);
-  modalModeCard.classList.toggle("is-active", !overlay);
-  modalModeOverlay.classList.toggle("is-active", overlay);
-  modalModeCard.setAttribute("aria-pressed", String(!overlay));
-  modalModeOverlay.setAttribute("aria-pressed", String(overlay));
+  breakLayer.classList.toggle("mode-overlay", overlay);
+  breakLayer.classList.toggle("mode-card", !overlay);
+  modeCard.classList.toggle("is-active", !overlay);
+  modeOverlay.classList.toggle("is-active", overlay);
+  modeCard.setAttribute("aria-pressed", String(!overlay));
+  modeOverlay.setAttribute("aria-pressed", String(overlay));
 }
+modeCard.addEventListener("click", () => setBreakStyle("card"));
+modeOverlay.addEventListener("click", () => setBreakStyle("overlay"));
 
-modalModeCard.addEventListener("click", () => setBreakStyle("card"));
-modalModeOverlay.addEventListener("click", () => setBreakStyle("overlay"));
-
-modalSoundToggle.addEventListener("click", () => {
+soundToggle.addEventListener("click", () => {
   soundEnabled = !soundEnabled;
-  modalSoundToggle.setAttribute("aria-pressed", String(soundEnabled));
-  modalSoundToggle.textContent = soundEnabled ? "Sound on" : "Muted";
+  soundToggle.setAttribute("aria-pressed", String(soundEnabled));
+  soundToggle.textContent = soundEnabled ? "Sound on" : "Muted";
 });
 
-function updateBreakCountdownUI(): void {
-  modalSecs.textContent = String(breakRemainingSecs);
-  const ratio = breakTotalSecs > 0 ? breakRemainingSecs / breakTotalSecs : 0;
-  modalBarFill.style.transform = `scaleX(${Math.max(0, Math.min(1, ratio))})`;
-}
-
-function stopBreakTimers(): void {
-  if (breakInterval !== null) {
-    window.clearInterval(breakInterval);
-    breakInterval = null;
+function renderBreak(): void {
+  const secs = Math.max(0, Math.ceil((breakTotal - breakElapsed) / 1000));
+  if (secs !== shownSecs) {
+    shownSecs = secs;
+    breakSecs.textContent = String(secs);
   }
-  if (hintTimer !== null) {
-    window.clearTimeout(hintTimer);
-    hintTimer = null;
-  }
-}
+  const ratio = breakTotal > 0 ? Math.max(0, 1 - breakElapsed / breakTotal) : 0;
+  breakBarFill.style.transform = `scaleX(${ratio})`;
 
-function scheduleNextHint(): void {
-  if (breakModal.classList.contains("hidden")) return;
-  hintTimer = window.setTimeout(() => {
-    hintTimer = null;
-    if (breakModal.classList.contains("hidden")) return;
-    hintIndex = (hintIndex + 1) % BREAK_HINTS.length;
-    modalHint.classList.add("fade");
+  const idx = Math.floor(breakElapsed / HINT_MS) % BREAK_HINTS.length;
+  if (idx !== hintIndex) {
+    hintIndex = idx;
+    breakHint.classList.add("fade");
     window.setTimeout(() => {
-      if (breakModal.classList.contains("hidden")) return;
-      modalHint.textContent = BREAK_HINTS[hintIndex];
-      modalHint.classList.remove("fade");
-      scheduleNextHint();
+      if (phase !== "break") return;
+      breakHint.textContent = BREAK_HINTS[idx];
+      breakHint.classList.remove("fade");
     }, 240);
-  }, 4500);
-}
-
-const inertTargets = ["site-header", "main", "site-footer", "mobile-cta"].map((id) => byId(id));
-let lastFocused: HTMLElement | null = null;
-
-function setBackgroundInert(on: boolean): void {
-  for (const el of inertTargets) {
-    if (on) el.setAttribute("inert", "");
-    else el.removeAttribute("inert");
   }
 }
 
-function closeModalUI(): void {
-  breakModal.classList.add("hidden");
-  document.body.style.overflow = "";
-  setBackgroundInert(false);
-  updateStickyBar();
-  lastFocused?.focus();
-  lastFocused = null;
-}
+function tick(t: number): void {
+  rafId = 0;
+  if (phase === "idle" || phase === "done" || !onScreen) return;
+  const dt = Math.max(0, t - lastT);
+  lastT = t;
 
-function finishBreakPreview(celebrate: boolean): void {
-  stopBreakTimers();
-  if (celebrate) {
-    if (soundEnabled) playGentleChime("complete");
-    modalTitle.textContent = "Nice";
-    modalHint.textContent = "Back to work when you are ready.";
-    modalEyes?.setMood("happy");
-
-    window.setTimeout(() => {
-      closeModalUI();
-      setStrainPercent(0);
-      heroEyes.celebrate(1600);
-      trayEyes.celebrate(1600);
-    }, 850);
+  if (phase === "auto") {
+    if (userInteracted || document.hidden) {
+      phase = "idle";
+      return;
+    }
+    playElapsed += dt;
+    const k = Math.min(1, playElapsed / AUTO_MS);
+    if (k >= 1) {
+      applyProgress(AUTO_TARGET);
+      phase = "idle";
+      return;
+    }
+    if (t - lastApply > 45) {
+      lastApply = t;
+      const eased = 1 - Math.pow(1 - k, 2);
+      applyProgress(eased * AUTO_TARGET);
+    }
+  } else if (phase === "playing") {
+    playElapsed += dt;
+    const p = Math.min(1, playElapsed / PLAY_MS);
+    if (p >= 1) {
+      applyProgress(1);
+      startBreak(false);
+    } else if (t - lastApply > 45) {
+      lastApply = t;
+      applyProgress(p);
+    }
   } else {
-    closeModalUI();
+    breakElapsed += dt;
+    if (breakElapsed >= breakTotal) {
+      breakElapsed = breakTotal;
+      renderBreak();
+      finishBreak(true);
+    } else {
+      renderBreak();
+    }
   }
+  kick();
 }
 
-function openBreakPreview(): void {
-  stopBreakTimers();
-  if (!modalEyes) {
-    modalEyes = new EyesComponent(modalEyesEl, {
+function kick(): void {
+  if (
+    rafId ||
+    !onScreen ||
+    document.hidden ||
+    (phase !== "auto" && phase !== "playing" && phase !== "break")
+  ) {
+    return;
+  }
+  lastT = performance.now();
+  rafId = requestAnimationFrame(tick);
+}
+
+function setPlaying(on: boolean): void {
+  playBtn.textContent = on ? "Playing..." : PLAY_LABEL;
+  playBtn.setAttribute("aria-disabled", String(on));
+  strainReadout.setAttribute("aria-live", on ? "off" : "polite");
+}
+
+function startBreak(fromPreview: boolean): void {
+  window.clearTimeout(finishTimer);
+  setPlaying(false);
+  phase = "break";
+  breakTotal = 20_000;
+  breakElapsed = 0;
+  shownSecs = -1;
+  hintIndex = 0;
+
+  if (!breakEyes) {
+    breakEyes = new EyesComponent(byId("break-eyes"), {
       style: currentStyle,
       mood: "relaxing",
       autoBlink: false,
       breathing: true,
     });
   } else {
-    modalEyes.setStyle(currentStyle);
-    modalEyes.setMood("relaxing");
+    breakEyes.setStyle(currentStyle);
+    breakEyes.setMood("relaxing");
   }
 
-  breakTotalSecs = 20;
-  breakRemainingSecs = 20;
-  hintIndex = 0;
-  modalTitle.textContent = "Look at something far away";
-  modalHint.classList.remove("fade");
-  modalHint.textContent = BREAK_HINTS[0];
-  updateBreakCountdownUI();
+  breakTitle.textContent = "Look at something far away";
+  breakHint.classList.remove("fade");
+  breakHint.textContent = BREAK_HINTS[0];
+  renderBreak();
+  breakLayer.hidden = false;
+  desk.classList.add("is-break");
+  breakStatus.textContent = "Break started. Look at something about 20 feet away for 20 seconds.";
 
-  lastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-  breakModal.classList.remove("hidden");
-  document.body.style.overflow = "hidden";
-  setBackgroundInert(true);
-  updateStickyBar();
-  modalSkip.focus();
+  const active = document.activeElement;
+  lastFocused = active instanceof HTMLElement && !breakLayer.contains(active) ? active : playBtn;
+  if (fromPreview) breakSkip.focus();
 
   if (soundEnabled) playGentleChime("start");
-
-  breakInterval = window.setInterval(() => {
-    breakRemainingSecs = Math.max(0, breakRemainingSecs - 1);
-    updateBreakCountdownUI();
-    if (breakRemainingSecs <= 0) {
-      finishBreakPreview(true);
-    }
-  }, 1000);
-
-  scheduleNextHint();
+  kick();
 }
 
-previewBreakBtn.addEventListener("click", openBreakPreview);
-modalPlus.addEventListener("click", () => {
-  breakRemainingSecs += 10;
-  breakTotalSecs = Math.max(breakTotalSecs + 10, breakRemainingSecs);
-  updateBreakCountdownUI();
-});
-modalSkip.addEventListener("click", () => finishBreakPreview(true));
-modalCloseX.addEventListener("click", () => finishBreakPreview(false));
+function closeBreak(): void {
+  window.clearTimeout(finishTimer);
+  const hadFocus = breakLayer.contains(document.activeElement);
+  breakLayer.hidden = true;
+  desk.classList.remove("is-break");
+  phase = "idle";
+  if (hadFocus) lastFocused?.focus();
+  lastFocused = null;
+}
 
-breakModal.addEventListener("click", (e) => {
-  if (e.target === breakModal && breakModal.classList.contains("mode-card")) {
-    finishBreakPreview(false);
-  }
-});
-
-window.addEventListener("keydown", (e) => {
-  if (breakModal.classList.contains("hidden")) return;
-  if (e.key === "Escape") {
-    finishBreakPreview(false);
+function finishBreak(celebrate: boolean): void {
+  if (phase !== "break") return;
+  if (!celebrate) {
+    closeBreak();
     return;
   }
-  if (e.key === "Tab") {
-    // Keep keyboard focus inside the dialog.
-    const focusables = Array.from(breakModal.querySelectorAll<HTMLElement>("button")).filter(
-      (el) => el.offsetParent !== null,
-    );
-    if (focusables.length === 0) return;
-    const first = focusables[0];
-    const last = focusables[focusables.length - 1];
-    const active = document.activeElement;
-    if (e.shiftKey && (active === first || !breakModal.contains(active))) {
-      e.preventDefault();
-      last.focus();
-    } else if (!e.shiftKey && (active === last || !breakModal.contains(active))) {
-      e.preventDefault();
-      first.focus();
-    }
-  }
-});
-
-// ---------------------------------------------------------------------------
-// OS detection & download links
-// ---------------------------------------------------------------------------
-type Platform = "mac" | "win" | "linux" | "mobile" | "other";
-
-function detectPlatform(): Platform {
-  const ua = navigator.userAgent.toLowerCase();
-  const nav = navigator as Navigator & { userAgentData?: { mobile?: boolean; platform?: string } };
-  const uaPlatform = (nav.userAgentData?.platform ?? navigator.platform ?? "").toLowerCase();
-  const touchMac = uaPlatform.includes("mac") && navigator.maxTouchPoints > 1; // iPadOS
-  if (nav.userAgentData?.mobile || /android|iphone|ipad|ipod|mobile/.test(ua) || touchMac) {
-    return "mobile";
-  }
-  if (ua.includes("windows") || uaPlatform.includes("win")) return "win";
-  if (ua.includes("mac") || uaPlatform.includes("mac")) return "mac";
-  if (ua.includes("linux") || ua.includes("x11") || uaPlatform.includes("linux")) return "linux";
-  return "other";
+  phase = "done";
+  if (soundEnabled) playGentleChime("complete");
+  breakTitle.textContent = "Nice";
+  breakHint.classList.remove("fade");
+  breakHint.textContent = "Back to work when you're ready.";
+  breakEyes?.setMood("happy");
+  breakStatus.textContent = "Break complete.";
+  finishTimer = window.setTimeout(() => {
+    closeBreak();
+    applyProgress(0);
+    heroEyes.celebrate(1600);
+    trayEyes.celebrate(1600);
+    floatEyes.celebrate(1600);
+  }, 850);
 }
 
-const platform = detectPlatform();
-const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+/** Stop the 20-minutes sequence, auto-preview, or an open break without celebrating. */
+function cancelActivity(): void {
+  if (phase === "auto") {
+    phase = "idle";
+  } else if (phase === "playing") {
+    phase = "idle";
+    setPlaying(false);
+  } else if (phase === "break" || phase === "done") {
+    closeBreak();
+  }
+}
 
+playBtn.addEventListener("click", () => {
+  markUserInteracted();
+  if (phase === "break" || phase === "done") return;
+  if (reduceMotion) {
+    applyProgress(1);
+    startBreak(false);
+    return;
+  }
+  applyProgress(0);
+  playElapsed = 0;
+  lastApply = 0;
+  phase = "playing";
+  setPlaying(true);
+  kick();
+});
+
+previewBtn.addEventListener("click", () => {
+  markUserInteracted();
+  if (phase === "break" || phase === "done") return;
+  if (phase === "playing") setPlaying(false);
+  startBreak(true);
+});
+
+breakPlus.addEventListener("click", () => {
+  if (phase !== "break") return;
+  breakTotal += 10_000;
+  renderBreak();
+});
+breakSkip.addEventListener("click", () => finishBreak(true));
+
+window.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && phase === "break") finishBreak(false);
+});
+
+// Pause the sequence, countdown and CSS animation while the mockup is offscreen;
+// trigger a gentle one-shot auto-preview the first time the desk enters view.
+if ("IntersectionObserver" in window) {
+  new IntersectionObserver(
+    ([entry]) => {
+      onScreen = entry.isIntersecting;
+      desk.classList.toggle("is-offscreen", !onScreen);
+      if (!onScreen && phase === "auto") {
+        phase = "idle";
+      }
+      if (
+        entry.intersectionRatio >= 0.35 &&
+        !reduceMotion &&
+        !userInteracted &&
+        !autoPreviewRan &&
+        phase === "idle"
+      ) {
+        autoPreviewRan = true;
+        playElapsed = 0;
+        lastApply = 0;
+        phase = "auto";
+      }
+      kick();
+    },
+    { threshold: [0, 0.35] },
+  ).observe(desk);
+}
+document.addEventListener("visibilitychange", kick);
+
+// ---------------------------------------------------------------------------
+// Download links
+// ---------------------------------------------------------------------------
 const downloadLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>("a[data-download]"));
 const heroCtas = byId("hero-ctas");
 const platformNote = byId("platform-note");
@@ -519,7 +655,7 @@ if (platform === "mac" || platform === "win") {
   stickyDownload.href = platform === "mac" ? MAC_URL : WIN_URL;
   stickyDownload.textContent = platform === "mac" ? "Download for macOS" : "Download for Windows";
   stickyDownload.hidden = false;
-  stickyText.textContent = "Free, open source";
+  stickyText.textContent = "Free & open source";
 } else {
   // Phones, tablets, Linux: send the link to a Mac or PC instead.
   stickyText.textContent = STICKY_DEFAULT_TEXT;
@@ -527,8 +663,7 @@ if (platform === "mac" || platform === "win") {
 }
 
 function updateStickyBar(): void {
-  const modalOpen = !breakModal.classList.contains("hidden");
-  const show = narrowMq.matches && heroCtasPast && !bottomCtasVisible && !modalOpen;
+  const show = narrowMq.matches && heroCtasPast && !bottomCtasVisible;
   stickyBar.classList.toggle("is-visible", show);
   document.body.classList.toggle("has-mobile-cta", narrowMq.matches && heroCtasPast);
 }
@@ -600,6 +735,6 @@ stickyShare.addEventListener("click", async () => {
   }
   const ok = await copyToClipboard(data.url);
   showStickyMessage(
-    ok ? "Link copied — open it on your computer" : "Couldn't copy — visit twnty.app on your computer",
+    ok ? "Link copied. Open it on your computer." : "Couldn't copy. Visit twnty.app on your computer.",
   );
 });

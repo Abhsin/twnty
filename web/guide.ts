@@ -28,10 +28,10 @@ if (btn && readout && prompt && bar && status && done) {
     timer = undefined;
     readout.textContent = "0";
     bar.style.transform = "scaleX(0)";
-    prompt.textContent = "Nice. That is one 20-20-20 break.";
+    prompt.textContent = "Nice, that's one 20-20-20 break.";
     status.textContent = "Break complete.";
     done.hidden = false;
-    btn.textContent = "Do it again";
+    btn.textContent = "Run another 20s break";
     btn.disabled = false;
   };
 
@@ -40,8 +40,8 @@ if (btn && readout && prompt && bar && status && done) {
     reset();
     done.hidden = true;
     btn.disabled = true;
-    btn.textContent = "Looking far away...";
-    prompt.textContent = "Look at something about 20 feet (6 metres) away.";
+    btn.textContent = "Keep looking far away...";
+    prompt.textContent = "Look at something about 20 feet (6 meters) away.";
     status.textContent = "Timer started. Look at something 20 feet away for 20 seconds.";
     const start = Date.now();
     timer = window.setInterval(() => {
