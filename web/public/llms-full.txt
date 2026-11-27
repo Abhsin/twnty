@@ -5,6 +5,7 @@
 Website: https://twnty.app/
 Source: https://github.com/Abhsin/twnty
 Guide: https://twnty.app/20-20-20-rule
+Privacy: https://twnty.app/privacy
 
 ## What it is
 
@@ -38,7 +39,7 @@ Free. MIT license. No paid tier.
 
 ## Privacy
 
-No accounts and no telemetry. Settings and stats are stored locally on your device.
+No accounts and no telemetry. The app makes no network connections of its own. Settings and stats are stored locally on your device. The website (not the app) uses cookieless, aggregate page-view analytics; details at https://twnty.app/privacy.
 
 ## Download
 

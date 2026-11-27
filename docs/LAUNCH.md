@@ -21,8 +21,8 @@ version mismatch (`tauri` crate 2.10.3 vs `@tauri-apps/api` 2.12.4). This branch
 3. Confirm the release is published and has `twnty_0.1.0_universal.dmg` and
    `twnty_0.1.0_x64-setup.exe`. The site links straight to
    `/releases/latest/download/<those names>`, so **asset names must stay the same**; when you
-   bump the version, update `APP_VERSION` in `web/main.ts`, the links in
-   `web/20-20-20-rule.html`, and `web/public/llms*.txt`.
+   bump the version, update `APP_VERSION` in `web/release.ts`, the static links in
+   `web/index.html`, `web/20-20-20-rule.html`, `web/thanks.html`, and `web/public/llms*.txt`.
 
 ## 1. Code signing (biggest install-rate lever after #0)
 
@@ -38,9 +38,10 @@ warnings. The site explains the workaround, but many people still bail.
 ## 2. Search engines (Day 1 after deploy)
 
 **Google Search Console** — https://search.google.com/search-console
-1. Add property → **Domain** → `twnty.app` → add the DNS TXT record at your registrar (best; covers
-   www + all paths). Alternative: URL-prefix property + paste the token into the commented
-   `google-site-verification` meta in `web/index.html`.
+1. Add property → **Domain** → `twnty.app` → verify with the DNS TXT record at your registrar
+   (recommended; covers www + all paths, and needs no code change). Only if you choose a
+   URL-prefix property instead, paste the **real** meta tag Google gives you into the `<head>` of
+   `web/index.html` (the site ships no placeholder tokens).
 2. Sitemaps → submit `https://twnty.app/sitemap.xml`.
 3. URL Inspection → `https://twnty.app/` and `/20-20-20-rule` → **Request indexing**.
 4. After a few days, check Enhancements for structured-data errors. Don't expect FAQ or star-rating
@@ -57,8 +58,10 @@ pages; https://www.opengraph.xyz for the share card.
 
 - Make `twnty.app` the **primary** domain; `vercel.json` already 301s `twnty-eight.vercel.app`
   and `www.twnty.app` to it (confirm with `curl -I https://twnty-eight.vercel.app`).
-- Optional: enable Vercel Web Analytics (cookieless) to see download-click conversion.
-  The download links carry `data-download="mac|win"`. If you add it, allow its script in the CSP.
+- **Enable Web Analytics:** Vercel dashboard → Project → Analytics → Enable. The site already
+  loads `/_vercel/insights/script.js` (same origin, cookieless), so the CSP needs no change.
+  Page views appear right away; the custom `download` event (with an `os` property) needs a
+  plan that supports custom events and is simply ignored otherwise.
 
 ## 4. GitHub repo (GitHub itself ranks for these searches)
 

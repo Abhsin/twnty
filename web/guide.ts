@@ -1,32 +1,4 @@
-const THEME_KEY = "twnty-web-theme";
-const root = document.documentElement;
-
-function applyStoredTheme(): void {
-  try {
-    const stored = localStorage.getItem(THEME_KEY);
-    if (stored === "light" || stored === "dark") root.setAttribute("data-theme", stored);
-  } catch {
-    /* storage unavailable */
-  }
-}
-
-function currentTheme(): "light" | "dark" {
-  const attr = root.getAttribute("data-theme");
-  if (attr === "light" || attr === "dark") return attr;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-}
-
-applyStoredTheme();
-
-document.getElementById("theme-toggle")?.addEventListener("click", () => {
-  const next = currentTheme() === "dark" ? "light" : "dark";
-  root.setAttribute("data-theme", next);
-  try {
-    localStorage.setItem(THEME_KEY, next);
-  } catch {
-    /* ignore */
-  }
-});
+import "./common";
 
 /* ---------- 20-second try-it-now timer ---------- */
 

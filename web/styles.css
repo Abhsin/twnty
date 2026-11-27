@@ -950,41 +950,6 @@ summary:focus-visible {
   color: var(--ink-2);
 }
 
-/* ---------- Footer ---------- */
-
-.site-footer {
-  max-width: 880px;
-  margin: 0 auto;
-  padding: 0 24px 48px;
-  font-size: 13px;
-  color: var(--ink-2);
-}
-
-.footer-inner {
-  padding-top: 24px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 16px 32px;
-  border-top: 1px solid var(--line);
-}
-
-.footer-brand {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.footer-brand strong {
-  color: var(--ink);
-}
-
-.footer-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 18px;
-}
-
 /* ---------- Break Preview Modal ---------- */
 
 .break-modal {
@@ -1197,6 +1162,73 @@ summary:focus-visible {
   background: var(--ink-3);
 }
 
+/* ---------- Sticky bottom CTA (narrow viewports) ---------- */
+
+.mobile-cta {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+  background: color-mix(in srgb, var(--bg) 94%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--line);
+  visibility: hidden;
+  transform: translateY(100%);
+  transition:
+    transform 0.25s ease,
+    visibility 0s linear 0.25s;
+}
+
+.mobile-cta.is-visible {
+  visibility: visible;
+  transform: none;
+  transition: transform 0.25s ease;
+}
+
+.mobile-cta-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--ink-2);
+}
+
+.mobile-cta .btn {
+  width: auto;
+  max-width: none;
+  min-width: 0;
+  height: 40px;
+  padding: 0 16px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+@media (min-width: 721px) {
+  .mobile-cta {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  body.has-mobile-cta {
+    padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-cta,
+  .mobile-cta.is-visible {
+    transition: none;
+  }
+}
+
 /* ---------- Responsive ---------- */
 
 @media (max-width: 680px) {
@@ -1212,10 +1244,6 @@ summary:focus-visible {
   .feature-grid,
   .install-cols {
     grid-template-columns: 1fr;
-  }
-
-  .nav-hide-sm {
-    display: none;
   }
 
   .privacy {

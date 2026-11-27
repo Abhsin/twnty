@@ -1,48 +1,12 @@
 import { EYE_STYLES, EyesComponent, type EyeStyle } from "../src/eyes/eyes";
 import { playGentleChime } from "../src/eyes/chime";
-
-const APP_VERSION = "0.1.0";
-const RELEASES_URL = "https://github.com/Abhsin/twnty/releases/latest";
-const MAC_FALLBACK = `${RELEASES_URL}/download/twnty_${APP_VERSION}_universal.dmg`;
-const WIN_FALLBACK = `${RELEASES_URL}/download/twnty_${APP_VERSION}_x64-setup.exe`;
-const LATEST_API = "https://api.github.com/repos/Abhsin/twnty/releases/latest";
+import "./common";
+import { LATEST_API, MAC_URL, WIN_URL } from "./release";
 
 const APPLE_ICON = `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-4.28 2.797-6.55 5.552-6.55 1.448 0 2.675.95 3.6.95.865 0 2.222-1.01 3.902-1.01.613 0 2.886.06 4.374 2.19-.13.09-2.383 1.37-2.383 4.19 0 3.26 2.854 4.42 2.955 4.45z"/></svg>`;
 const WINDOWS_ICON = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.45 10.94 4.3v7.1H3V5.45zm0 13.1 7.94 1.15v-7.03H3v5.88zm8.97-14.4L21 2.8v8.6h-9.03V4.15zm0 15.7L21 21.2v-8.53h-9.03v7.18z"/></svg>`;
 
 const byId = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
-
-// ---------------------------------------------------------------------------
-// Theme toggle
-// ---------------------------------------------------------------------------
-const THEME_KEY = "twnty-web-theme";
-const rootEl = document.documentElement;
-const themeToggle = byId<HTMLButtonElement>("theme-toggle");
-
-function getEffectiveTheme(): "light" | "dark" {
-  const attr = rootEl.getAttribute("data-theme");
-  if (attr === "light" || attr === "dark") return attr;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-}
-
-try {
-  const savedTheme = localStorage.getItem(THEME_KEY);
-  if (savedTheme === "light" || savedTheme === "dark") {
-    rootEl.setAttribute("data-theme", savedTheme);
-  }
-} catch {
-  // Ignore storage restrictions
-}
-
-themeToggle.addEventListener("click", () => {
-  const next = getEffectiveTheme() === "dark" ? "light" : "dark";
-  rootEl.setAttribute("data-theme", next);
-  try {
-    localStorage.setItem(THEME_KEY, next);
-  } catch {
-    // Ignore storage restrictions
-  }
-});
 
 // ---------------------------------------------------------------------------
 // Live eyes: Hero, Menu-bar preview, Style picker
@@ -280,7 +244,7 @@ function scheduleNextHint(): void {
   }, 4500);
 }
 
-const inertTargets = ["site-header", "main", "site-footer"].map((id) => byId(id));
+const inertTargets = ["site-header", "main", "site-footer", "mobile-cta"].map((id) => byId(id));
 let lastFocused: HTMLElement | null = null;
 
 function setBackgroundInert(on: boolean): void {
@@ -294,6 +258,7 @@ function closeModalUI(): void {
   breakModal.classList.add("hidden");
   document.body.style.overflow = "";
   setBackgroundInert(false);
+  updateStickyBar();
   lastFocused?.focus();
   lastFocused = null;
 }
@@ -343,6 +308,7 @@ function openBreakPreview(): void {
   breakModal.classList.remove("hidden");
   document.body.style.overflow = "hidden";
   setBackgroundInert(true);
+  updateStickyBar();
   modalSkip.focus();
 
   if (soundEnabled) playGentleChime("start");
@@ -429,14 +395,14 @@ for (const holder of Array.from(document.querySelectorAll<HTMLElement>("[data-os
 }
 
 function setDownloadHref(kind: "mac" | "win", url: string): void {
-  for (const a of downloadLinks) {
+  for (const a of Array.from(document.querySelectorAll<HTMLAnchorElement>("a[data-download]"))) {
     if (a.dataset.download === kind) a.href = url;
   }
 }
 
-// Direct-download fallbacks (the version lives in APP_VERSION above).
-setDownloadHref("mac", MAC_FALLBACK);
-setDownloadHref("win", WIN_FALLBACK);
+// Direct-download fallbacks (the version lives in release.ts).
+setDownloadHref("mac", MAC_URL);
+setDownloadHref("win", WIN_URL);
 
 // Style the detected OS as the primary action. Buttons keep identical sizes, so
 // nothing shifts when this runs.
@@ -531,3 +497,109 @@ async function hydrateReleaseLinks(): Promise<void> {
 }
 
 void hydrateReleaseLinks();
+
+// ---------------------------------------------------------------------------
+// Sticky bottom CTA (narrow viewports only)
+// ---------------------------------------------------------------------------
+const stickyBar = byId("mobile-cta");
+const stickyText = byId("mobile-cta-text");
+const stickyDownload = byId<HTMLAnchorElement>("mobile-cta-download");
+const stickyShare = byId<HTMLButtonElement>("mobile-cta-share");
+const bottomCtas = document.querySelector<HTMLElement>(".bottom-cta .hero-ctas");
+const narrowMq = window.matchMedia("(max-width: 720px)");
+
+const STICKY_DEFAULT_TEXT = "twnty is for Mac & Windows";
+let heroCtasPast = false;
+let bottomCtasVisible = false;
+let stickyMsgTimer: number | undefined;
+
+if (platform === "mac" || platform === "win") {
+  // Narrow desktop window: offer the real download.
+  stickyDownload.dataset.download = platform;
+  stickyDownload.href = platform === "mac" ? MAC_URL : WIN_URL;
+  stickyDownload.textContent = platform === "mac" ? "Download for macOS" : "Download for Windows";
+  stickyDownload.hidden = false;
+  stickyText.textContent = "Free, open source";
+} else {
+  // Phones, tablets, Linux: send the link to a Mac or PC instead.
+  stickyText.textContent = STICKY_DEFAULT_TEXT;
+  stickyShare.hidden = false;
+}
+
+function updateStickyBar(): void {
+  const modalOpen = !breakModal.classList.contains("hidden");
+  const show = narrowMq.matches && heroCtasPast && !bottomCtasVisible && !modalOpen;
+  stickyBar.classList.toggle("is-visible", show);
+  document.body.classList.toggle("has-mobile-cta", narrowMq.matches && heroCtasPast);
+}
+
+if ("IntersectionObserver" in window) {
+  new IntersectionObserver(
+    ([entry]) => {
+      heroCtasPast = !entry.isIntersecting && entry.boundingClientRect.top < 0;
+      updateStickyBar();
+    },
+    { threshold: 0 },
+  ).observe(heroCtas);
+  if (bottomCtas) {
+    new IntersectionObserver(
+      ([entry]) => {
+        bottomCtasVisible = entry.isIntersecting;
+        updateStickyBar();
+      },
+      { threshold: 0 },
+    ).observe(bottomCtas);
+  }
+}
+narrowMq.addEventListener("change", updateStickyBar);
+
+function showStickyMessage(msg: string): void {
+  stickyText.textContent = msg;
+  window.clearTimeout(stickyMsgTimer);
+  stickyMsgTimer = window.setTimeout(() => {
+    stickyText.textContent = STICKY_DEFAULT_TEXT;
+  }, 5000);
+}
+
+async function copyToClipboard(text: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    // Fall back to the legacy path (insecure contexts, older browsers).
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.cssText = "position:fixed;top:0;left:0;opacity:0";
+      document.body.append(ta);
+      ta.select();
+      const ok = document.execCommand("copy");
+      ta.remove();
+      return ok;
+    } catch {
+      return false;
+    }
+  }
+}
+
+stickyShare.addEventListener("click", async () => {
+  const data = {
+    title: "twnty",
+    text: "twnty: a free 20-20-20 eye break app for Mac & Windows",
+    url: "https://twnty.app",
+  };
+  if (typeof navigator.share === "function") {
+    try {
+      await navigator.share(data);
+      return;
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return; // user cancelled
+      // Any other failure: fall through to copying the link.
+    }
+  }
+  const ok = await copyToClipboard(data.url);
+  showStickyMessage(
+    ok ? "Link copied — open it on your computer" : "Couldn't copy — visit twnty.app on your computer",
+  );
+});

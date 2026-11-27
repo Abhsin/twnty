@@ -10,10 +10,6 @@
     />
     <meta name="robots" content="index,follow,max-image-preview:large" />
     <link rel="canonical" href="https://twnty.app/" />
-    <!-- Paste verification tokens here when you have them:
-    <meta name="google-site-verification" content="..." />
-    <meta name="msvalidate.01" content="..." />
-    -->
     <meta name="theme-color" content="#f7f6f3" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#151514" media="(prefers-color-scheme: dark)" />
 
@@ -47,6 +43,7 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="alternate" type="text/plain" title="LLM summary" href="/llms.txt" />
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./chrome.css" />
 
     <script type="application/ld+json">
       {
@@ -128,7 +125,7 @@
                 "name": "Does twnty track me?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No. There are no accounts, no analytics and no telemetry. Your settings and break stats stay on your computer."
+                  "text": "No. The app has no accounts, no analytics and no telemetry. Your settings and break stats stay on your computer. The website uses cookieless, aggregate page-view analytics only."
                 }
               },
               {
@@ -177,11 +174,26 @@
         </a>
 
         <nav class="header-actions" aria-label="Primary">
-          <a class="nav-link nav-hide-sm" href="/20-20-20-rule">The 20-20-20 rule</a>
-          <a class="nav-link nav-hide-sm" href="#faq">FAQ</a>
-          <a class="nav-link" href="https://github.com/Abhsin/twnty" target="_blank" rel="noopener noreferrer">
-            GitHub
-          </a>
+          <button
+            id="nav-toggle"
+            class="icon-btn nav-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="nav-links"
+            aria-label="Open menu"
+          >
+            <svg class="icon-open" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+              <path d="M4 7h16M4 12h16M4 17h16" />
+            </svg>
+            <svg class="icon-close" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+              <path d="M6 6l12 12M18 6 6 18" />
+            </svg>
+          </button>
+          <div id="nav-links" class="nav-links">
+            <a class="nav-link" href="/20-20-20-rule">The 20-20-20 rule</a>
+            <a class="nav-link" href="/#faq">FAQ</a>
+            <a class="nav-link" href="https://github.com/Abhsin/twnty" target="_blank" rel="noopener noreferrer">GitHub</a>
+          </div>
           <button
             id="theme-toggle"
             class="icon-btn"
@@ -246,7 +258,7 @@
           <li>Open source (MIT)</li>
           <li>A few MB</li>
           <li>No account</li>
-          <li>No tracking</li>
+          <li>No telemetry</li>
         </ul>
 
         <p class="meta-line">
@@ -451,9 +463,11 @@
         <div>
           <h2 id="privacy-title">Private by design</h2>
           <p>
-            No account, no analytics, no telemetry. Your settings and break stats stay on your
-            computer. Don't take our word for it: the whole app is
+            The app has no account, no analytics and no telemetry. Your settings and break stats stay on
+            your computer. Don't take our word for it: the whole app is
             <a class="link" href="https://github.com/Abhsin/twnty" target="_blank" rel="noopener noreferrer">open source under the MIT license</a>.
+            This website uses only cookieless, aggregate page-view analytics.
+            <a class="link" href="/privacy">Read the privacy policy</a>.
           </p>
         </div>
       </section>
@@ -493,8 +507,9 @@
           <details>
             <summary>Does twnty track me?</summary>
             <p>
-              No. There are no accounts, no analytics and no telemetry. Your settings and break stats
-              stay on your computer.
+              No. The app has no accounts, no analytics and no telemetry. Your settings and break
+              stats stay on your computer. The website uses cookieless, aggregate page-view analytics
+              only; see the <a class="link" href="/privacy">privacy policy</a>.
             </p>
           </details>
           <details>
@@ -562,14 +577,24 @@
           <span>A free, open-source 20-20-20 eye break app for Mac and Windows.</span>
         </div>
         <nav class="footer-links" aria-label="Footer">
-          <a class="link" href="/20-20-20-rule">The 20-20-20 rule</a>
-          <a class="link" href="https://github.com/Abhsin/twnty" target="_blank" rel="noopener noreferrer">GitHub</a>
-          <a class="link" href="https://github.com/Abhsin/twnty/releases/latest" target="_blank" rel="noopener noreferrer">Releases</a>
-          <a class="link" href="https://github.com/Abhsin/twnty/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>
-          <a class="link" href="/llms.txt">llms.txt</a>
+          <a href="/">Home</a>
+          <a href="/20-20-20-rule">20-20-20 rule guide</a>
+          <a href="/privacy">Privacy</a>
+          <a href="https://github.com/Abhsin/twnty" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="https://github.com/Abhsin/twnty/releases/latest" target="_blank" rel="noopener noreferrer">Releases</a>
+          <a href="https://github.com/Abhsin/twnty/issues" target="_blank" rel="noopener noreferrer">Report a bug</a>
+          <a href="https://github.com/Abhsin/twnty/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>
+          <a href="/llms.txt">llms.txt</a>
         </nav>
       </div>
+      <p class="footer-copy">&copy; <span data-year>2026</span> twnty &middot; Made by Abhishek Singh</p>
     </footer>
+
+    <div id="mobile-cta" class="mobile-cta">
+      <span id="mobile-cta-text" class="mobile-cta-text" aria-live="polite">twnty is for Mac &amp; Windows</span>
+      <a id="mobile-cta-download" class="btn btn-primary" href="https://github.com/Abhsin/twnty/releases/latest" rel="noopener" hidden>Download</a>
+      <button id="mobile-cta-share" class="btn btn-primary" type="button" hidden>Send to my computer</button>
+    </div>
 
     <div
       id="break-modal"

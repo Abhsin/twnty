@@ -14,6 +14,7 @@ twnty is for anyone who works at a screen for long stretches (developers, design
 
 - [Website](https://twnty.app/): product overview with an interactive eye demo and break-screen preview
 - [The 20-20-20 rule explained](https://twnty.app/20-20-20-rule): guide to the rule for digital eye strain
+- [Privacy policy](https://twnty.app/privacy): what the app and this website do and don't do with your data
 - [Source code](https://github.com/Abhsin/twnty): MIT-licensed repository, README, and issues
 
 ## Features
@@ -27,8 +28,9 @@ twnty is for anyone who works at a screen for long stretches (developers, design
 
 ## Privacy
 
-- No accounts, no telemetry, no analytics in the app
+- No accounts, no telemetry, no analytics in the app; the app makes no network connections of its own
 - All settings and stats are stored locally on your device
+- The website uses cookieless, aggregate page-view analytics (Vercel Web Analytics), no ad trackers
 
 ## FAQ
 

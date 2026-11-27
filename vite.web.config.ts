@@ -20,6 +20,8 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, "web/index.html"),
         guide: resolve(__dirname, "web/20-20-20-rule.html"),
+        privacy: resolve(__dirname, "web/privacy.html"),
+        thanks: resolve(__dirname, "web/thanks.html"),
       },
     },
   },

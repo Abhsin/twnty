@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thanks for downloading twnty | Install steps</title>
+    <meta
+      name="description"
+      content="Your twnty download is starting. Quick install steps for macOS and Windows, and what to expect from the eyes in your menu bar or system tray."
+    />
+    <meta name="robots" content="noindex,follow" />
+    <link rel="canonical" href="https://twnty.app/thanks" />
+    <meta name="theme-color" content="#f7f6f3" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#151514" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./chrome.css" />
+    <link rel="stylesheet" href="./thanks.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header" id="site-header">
+      <div class="header-inner">
+        <a class="brand" href="/" aria-label="twnty home">
+          <svg class="brand-mark" width="28" height="18" viewBox="0 0 28 18" fill="none" aria-hidden="true">
+            <ellipse cx="8.5" cy="9" rx="6" ry="7.5" fill="#ffffff" stroke="currentColor" stroke-width="2" />
+            <ellipse cx="19.5" cy="9" rx="6" ry="7.5" fill="#ffffff" stroke="currentColor" stroke-width="2" />
+            <circle cx="8.5" cy="9.2" r="2.5" fill="#1c1c1a" />
+            <circle cx="19.5" cy="9.2" r="2.5" fill="#1c1c1a" />
+          </svg>
+          <span>twnty</span>
+        </a>
+
+        <nav class="header-actions" aria-label="Primary">
+          <button
+            id="nav-toggle"
+            class="icon-btn nav-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="nav-links"
+            aria-label="Open menu"
+          >
+            <svg class="icon-open" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+              <path d="M4 7h16M4 12h16M4 17h16" />
+            </svg>
+            <svg class="icon-close" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+              <path d="M6 6l12 12M18 6 6 18" />
+            </svg>
+          </button>
+          <div id="nav-links" class="nav-links">
+            <a class="nav-link" href="/20-20-20-rule">The 20-20-20 rule</a>
+            <a class="nav-link" href="/#faq">FAQ</a>
+            <a class="nav-link" href="https://github.com/Abhsin/twnty" target="_blank" rel="noopener noreferrer">GitHub</a>
+          </div>
+          <button
+            id="theme-toggle"
+            class="icon-btn"
+            type="button"
+            aria-label="Toggle light or dark theme"
+            title="Toggle theme"
+          >
+            <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+            </svg>
+            <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+            </svg>
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="page thanks">
+      <section class="thanks-hero" aria-labelledby="thanks-title">
+        <div id="thanks-eyes" class="thanks-eyes" role="img" aria-label="Two happy cartoon eyes"></div>
+        <h1 id="thanks-title">Thanks for downloading twnty <span aria-hidden="true">👀</span></h1>
+        <p class="thanks-sub" id="dl-status" role="status">Your download should start in a moment.</p>
+        <p class="thanks-fallback">
+          Download didn't start?
+          <a id="dl-link" class="link" href="https://github.com/Abhsin/twnty/releases/latest/download/twnty_0.1.0_universal.dmg">Click here</a>.
+        </p>
+        <noscript>
+          <p class="thanks-fallback">
+            JavaScript is off, so the download can't start by itself. Get it directly:
+            <a class="link" href="https://github.com/Abhsin/twnty/releases/latest/download/twnty_0.1.0_universal.dmg">macOS (.dmg)</a>
+            or
+            <a class="link" href="https://github.com/Abhsin/twnty/releases/latest/download/twnty_0.1.0_x64-setup.exe">Windows (.exe)</a>.
+          </p>
+        </noscript>
+      </section>
+
+      <section class="thanks-card" aria-labelledby="install-title">
+        <h2 id="install-title">Install in a minute</h2>
+        <p class="install-lead">
+          twnty isn't code-signed yet, so your system will ask you to confirm the first launch. It's
+          a one-time step, and the
+          <a class="link" href="https://github.com/Abhsin/twnty" target="_blank" rel="noopener noreferrer">source is public</a>
+          if you'd like to check it first.
+        </p>
+
+        <div class="steps" data-os-steps="mac">
+          <h3>macOS</h3>
+          <ol>
+            <li>Open the downloaded <strong>.dmg</strong> file.</li>
+            <li>Drag <strong>twnty</strong> into your <strong>Applications</strong> folder.</li>
+            <li>Open twnty once. When macOS shows a warning, click <strong>Done</strong>.</li>
+            <li>
+              Open <strong>System Settings</strong>, then <strong>Privacy &amp; Security</strong>, and
+              scroll down. Click <strong>Open Anyway</strong> and confirm (macOS 15 and later).
+            </li>
+          </ol>
+        </div>
+
+        <div class="steps" data-os-steps="win">
+          <h3>Windows</h3>
+          <ol>
+            <li>Run the downloaded <strong>installer</strong> (.exe).</li>
+            <li>If SmartScreen says "Windows protected your PC", click <strong>More info</strong>.</li>
+            <li>Click <strong>Run anyway</strong>, then follow the installer.</li>
+          </ol>
+        </div>
+
+        <p class="switch-os" id="switch-os" hidden>
+          Wrong system?
+          <a id="switch-os-link" class="link" href="/thanks?os=win">Get the other version</a>.
+        </p>
+      </section>
+
+      <section class="thanks-card" aria-labelledby="expect-title">
+        <h2 id="expect-title">What to expect</h2>
+        <ul class="expect">
+          <li>
+            A pair of eyes appears in your <strong>menu bar</strong> (macOS) or
+            <strong>system tray</strong> (Windows). On Windows, open the tray's hidden-icons
+            arrow if you don't see them.
+          </li>
+          <li>Over 20 minutes they slowly redden and droop as screen time builds.</li>
+          <li>
+            When time's up, a calm 20-second break appears. Look about 20 feet away, and the eyes
+            perk back up.
+          </li>
+        </ul>
+      </section>
+
+      <section class="thanks-asks" aria-labelledby="asks-title">
+        <h2 id="asks-title">If you like it</h2>
+        <div class="ask-row">
+          <a class="btn btn-secondary" href="https://github.com/Abhsin/twnty" target="_blank" rel="noopener noreferrer">Star twnty on GitHub</a>
+          <a class="btn btn-secondary" href="https://github.com/Abhsin/twnty/issues" target="_blank" rel="noopener noreferrer">Report a bug or suggest a feature</a>
+        </div>
+        <p class="ask-guide">
+          Curious why 20-20-20?
+          <a class="link" href="/20-20-20-rule">Read the guide to the 20-20-20 rule</a>.
+        </p>
+      </section>
+    </main>
+
+    <footer class="site-footer" id="site-footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <strong>twnty</strong>
+          <span>A free, open-source 20-20-20 eye break app for Mac and Windows.</span>
+        </div>
+        <nav class="footer-links" aria-label="Footer">
+          <a href="/">Home</a>
+          <a href="/20-20-20-rule">20-20-20 rule guide</a>
+          <a href="/privacy">Privacy</a>
+          <a href="https://github.com/Abhsin/twnty" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="https://github.com/Abhsin/twnty/releases/latest" target="_blank" rel="noopener noreferrer">Releases</a>
+          <a href="https://github.com/Abhsin/twnty/issues" target="_blank" rel="noopener noreferrer">Report a bug</a>
+          <a href="https://github.com/Abhsin/twnty/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>
+          <a href="/llms.txt">llms.txt</a>
+        </nav>
+      </div>
+      <p class="footer-copy">&copy; <span data-year>2026</span> twnty &middot; Made by Abhishek Singh</p>
+    </footer>
+
+    <script type="module" src="./thanks.ts"></script>
+  </body>
+</html>
